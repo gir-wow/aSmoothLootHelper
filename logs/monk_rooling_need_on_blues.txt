@@ -1,0 +1,472 @@
+18:53:07  --- Roll on [Cloudstrike Pendant] (id=81180)
+18:53:07    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+18:53:07      [BisTooltip] class=Monk  spec=Mistweaver
+18:53:07      [BisTooltip] No spec match. Item specs: Death knight/Frost, Death knight/Unholy, Paladin/Protection, Paladin/Retribution, Warrior/Arms, Warrior/Fury
+18:53:07      [BisTooltip] class=Monk  spec=Mistweaver
+18:53:07      [BisTooltip] No spec match. Item specs: Death knight/Frost, Death knight/Unholy, Paladin/Protection, Paladin/Retribution, Warrior/Arms, Warrior/Fury
+18:53:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+18:53:07      [FrogBiS] specKey=Mistweaver Monk
+18:53:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+18:53:07      [FrogBiS] item 81180 not found in any list
+18:53:07      [FrogBiS] specKey=Mistweaver Monk
+18:53:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+18:53:07      [FrogBiS] item 81180 not found in any list
+18:53:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+18:53:07    Pawn check: isUpgrade=false
+18:57:01  --- Roll on [Snowdrift's Bladed Staff] (id=81108)
+18:57:01    quality=Rare  ilvl=463  type=Weapon  subType=Staves  cached=true  retry=0
+18:57:01      [BisTooltip] class=Monk  spec=Mistweaver
+18:57:01      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral
+18:57:01      [BisTooltip] class=Monk  spec=Mistweaver
+18:57:01      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral
+18:57:01    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+18:57:01      [FrogBiS] specKey=Mistweaver Monk
+18:57:01      [FrogBiS] Mistweaver Monk: 1 list(s)
+18:57:01      [FrogBiS] item 81108 not found in any list
+18:57:01      [FrogBiS] specKey=Mistweaver Monk
+18:57:01      [FrogBiS] Mistweaver Monk: 1 list(s)
+18:57:01      [FrogBiS] item 81108 not found in any list
+18:57:01    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+18:57:01    Pawn check: isUpgrade=false
+18:59:37  --- Roll on [Crescent of Ichor] (id=81089)
+18:59:37    quality=Rare  ilvl=463  type=Weapon  subType=One-Handed Axes  cached=true  retry=0
+18:59:37      [BisTooltip] class=Monk  spec=Mistweaver
+18:59:37      [BisTooltip] No spec match. Item specs: Monk/Windwalker, Rogue/Combat, Shaman/Enhancement
+18:59:37      [BisTooltip] class=Monk  spec=Mistweaver
+18:59:37      [BisTooltip] No spec match. Item specs: Monk/Windwalker, Rogue/Combat, Shaman/Enhancement
+18:59:37    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+18:59:37      [FrogBiS] specKey=Mistweaver Monk
+18:59:37      [FrogBiS] Mistweaver Monk: 1 list(s)
+18:59:37      [FrogBiS] item 81089 not found in any list
+18:59:37      [FrogBiS] specKey=Mistweaver Monk
+18:59:37      [FrogBiS] Mistweaver Monk: 1 list(s)
+18:59:37      [FrogBiS] item 81089 not found in any list
+18:59:37    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+18:59:37    Pawn check: isUpgrade=false
+19:00:11  --- Roll on [Yak Vest of the Galeburst] (id=82248)
+19:00:11    quality=Uncommon  ilvl=429  type=Armor  subType=Mail  cached=true  retry=0
+19:00:11      [BisTooltip] item 82248 not in BiS database
+19:00:11      [BisTooltip] item 82248 not in BiS database
+19:00:11    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:00:11      [FrogBiS] specKey=Mistweaver Monk
+19:00:11      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:00:11      [FrogBiS] item 82248 not found in any list
+19:00:11      [FrogBiS] specKey=Mistweaver Monk
+19:00:11      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:00:11      [FrogBiS] item 82248 not found in any list
+19:00:11    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:00:11    Pawn check: isUpgrade=false
+19:02:07  --- Roll on [Seal of Sullen Fury] (id=105076)
+19:02:07    quality=Epic  ilvl=528  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:02:07      [BisTooltip] item 105076 not in BiS database
+19:02:07      [BisTooltip] item 105076 not in BiS database
+19:02:07    BiS check [BisTooltip]: isBiS=false  collected=true  normalOfBiS=false
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 105076 not found in any list
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 105076 not found in any list
+19:02:07    BiS check [FrogBiS]: isBiS=false  collected=true  normalOfBiS=false
+19:02:07    Pawn check: isUpgrade=false
+19:02:07  --- Roll on [Legplates of Willful Doom] (id=105067)
+19:02:07    quality=Epic  ilvl=528  type=Armor  subType=Plate  cached=true  retry=0
+19:02:07      [BisTooltip] item 105067 not in BiS database
+19:02:07      [BisTooltip] item 105067 not in BiS database
+19:02:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] MATCH in Mistweaver Monk / template(T16)
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] MATCH in Mistweaver Monk / template(T16)
+19:02:07    BiS check [FrogBiS]: isBiS=true  collected=false  normalOfBiS=true
+19:02:07  --- Roll on [Helm of the Cursed Protector] (id=99673)
+19:02:07    quality=Epic  ilvl=528  type=Miscellaneous  subType=Junk  cached=true  retry=0
+19:02:07      [BisTooltip] item 99673 not in BiS database
+19:02:07      [BisTooltip] item 99673 not in BiS database
+19:02:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 99673 not found in any list
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 99673 not found in any list
+19:02:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07    Downgrade check (ilvl): equippedBetter=false  dropIlvl=528
+19:02:07    No rule matched — manual roll.
+19:02:07  --- Roll on [Seal of Hateful Meditation] (id=81186)
+19:02:07    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:02:07      [BisTooltip] class=Monk  spec=Mistweaver
+19:02:07      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral, Hunter/Beast mastery, Hunter/Marksmanship, Hunter/Survival, Monk/Brewmaster, Monk/Windwalker, Rogue/Assassination, Rogue/Combat, Rogue/Subtlety, Shaman/Enhancement
+19:02:07      [BisTooltip] class=Monk  spec=Mistweaver
+19:02:07      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral, Hunter/Beast mastery, Hunter/Marksmanship, Hunter/Survival, Monk/Brewmaster, Monk/Windwalker, Rogue/Assassination, Rogue/Combat, Rogue/Subtlety, Shaman/Enhancement
+19:02:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 81186 not found in any list
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 81186 not found in any list
+19:02:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07    Pawn check: isUpgrade=false
+19:02:07  --- Roll on [Sha-Seared Sandals] (id=104941)
+19:02:07    quality=Epic  ilvl=528  type=Armor  subType=Cloth  cached=true  retry=0
+19:02:07      [BisTooltip] item 104941 not in BiS database
+19:02:07      [BisTooltip] item 104941 not in BiS database
+19:02:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 104941 not found in any list
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 104941 not found in any list
+19:02:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07    Pawn check: isUpgrade=false
+19:02:07  --- Roll on [Robes of Fevered Dreams] (id=81188)
+19:02:07    quality=Rare  ilvl=463  type=Armor  subType=Cloth  cached=true  retry=0
+19:02:07      [BisTooltip] class=Monk  spec=Mistweaver
+19:02:07      [BisTooltip] No spec match. Item specs: Mage/Arcane, Mage/Fire, Mage/Frost, Priest/Discipline, Priest/Holy, Priest/Shadow, Warlock/Affliction, Warlock/Demonology, Warlock/Destruction
+19:02:07      [BisTooltip] class=Monk  spec=Mistweaver
+19:02:07      [BisTooltip] No spec match. Item specs: Mage/Arcane, Mage/Fire, Mage/Frost, Priest/Discipline, Priest/Holy, Priest/Shadow, Warlock/Affliction, Warlock/Demonology, Warlock/Destruction
+19:02:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 81188 not found in any list
+19:02:07      [FrogBiS] specKey=Mistweaver Monk
+19:02:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:02:07      [FrogBiS] item 81188 not found in any list
+19:02:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:02:07    Pawn check: isUpgrade=false
+19:05:44  --- Roll on [Thresher Gloves of the Windstorm] (id=82205)
+19:05:44    quality=Uncommon  ilvl=416  type=Armor  subType=Leather  cached=true  retry=0
+19:05:44    Armor filter: subType=Leather  playerType=Leather  isOff=false
+19:05:44      [BisTooltip] item 82205 not in BiS database
+19:05:44      [BisTooltip] item 82205 not in BiS database
+19:05:44    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:05:44      [FrogBiS] specKey=Mistweaver Monk
+19:05:44      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:05:44      [FrogBiS] item 82205 not found in any list
+19:05:44      [FrogBiS] specKey=Mistweaver Monk
+19:05:44      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:05:44      [FrogBiS] item 82205 not found in any list
+19:05:44    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:05:44    Pawn check: isUpgrade=false
+19:07:39  --- Roll on [Whirling Dervish Choker] (id=81239)
+19:07:39    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:07:39    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:07:39      [BisTooltip] class=Monk  spec=Mistweaver
+19:07:39      [BisTooltip] No spec match. Item specs: Death knight/Frost, Death knight/Unholy, Paladin/Protection, Paladin/Retribution, Warrior/Arms, Warrior/Fury
+19:07:39      [BisTooltip] class=Monk  spec=Mistweaver
+19:07:39      [BisTooltip] No spec match. Item specs: Death knight/Frost, Death knight/Unholy, Paladin/Protection, Paladin/Retribution, Warrior/Arms, Warrior/Fury
+19:07:39    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:07:39      [FrogBiS] specKey=Mistweaver Monk
+19:07:39      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:07:39      [FrogBiS] item 81239 not found in any list
+19:07:39      [FrogBiS] specKey=Mistweaver Monk
+19:07:39      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:07:39      [FrogBiS] item 81239 not found in any list
+19:07:39    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:07:39    History match: greeded before
+19:09:04  --- Roll on [Immaculate Ring of the Feverflare] (id=82283)
+19:09:04    quality=Uncommon  ilvl=429  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:09:04    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:09:04      [BisTooltip] item 82283 not found directly, matched variant 82826
+19:09:04      [BisTooltip] class=Monk  spec=Mistweaver
+19:09:04      [BisTooltip] No spec match. Item specs: Mage/Arcane, Mage/Fire, Mage/Frost, Priest/Holy, Warlock/Affliction, Warlock/Demonology, Warlock/Destruction
+19:09:04      [BisTooltip] item 82283 not found directly, matched variant 82826
+19:09:04      [BisTooltip] class=Monk  spec=Mistweaver
+19:09:04      [BisTooltip] No spec match. Item specs: Mage/Arcane, Mage/Fire, Mage/Frost, Priest/Holy, Warlock/Affliction, Warlock/Demonology, Warlock/Destruction
+19:09:04    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:09:04      [FrogBiS] specKey=Mistweaver Monk
+19:09:04      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:09:04      [FrogBiS] item 82283 not found in any list
+19:09:04      [FrogBiS] specKey=Mistweaver Monk
+19:09:04      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:09:04      [FrogBiS] item 82283 not found in any list
+19:09:04    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:09:04    Pawn check: isUpgrade=false
+19:09:21  --- Roll on [Engraved Hammer of the Mercenary] (id=82272)
+19:09:21    quality=Uncommon  ilvl=429  type=Weapon  subType=Two-Handed Maces  cached=true  retry=0
+19:09:21    Armor filter: subType=Two-Handed Maces  playerType=Leather  isOff=false
+19:09:21      [BisTooltip] item 82272 not found directly, matched variant 82815
+19:09:21      [BisTooltip] class=Monk  spec=Mistweaver
+19:09:21      [BisTooltip] No spec match. Item specs: Hunter/Beast mastery, Hunter/Marksmanship, Hunter/Survival, Shaman/Enhancement
+19:09:21      [BisTooltip] item 82272 not found directly, matched variant 82815
+19:09:21      [BisTooltip] class=Monk  spec=Mistweaver
+19:09:21      [BisTooltip] No spec match. Item specs: Hunter/Beast mastery, Hunter/Marksmanship, Hunter/Survival, Shaman/Enhancement
+19:09:21    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:09:21      [FrogBiS] specKey=Mistweaver Monk
+19:09:21      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:09:21      [FrogBiS] item 82272 not found in any list
+19:09:21      [FrogBiS] specKey=Mistweaver Monk
+19:09:21      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:09:21      [FrogBiS] item 82272 not found in any list
+19:09:21    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:09:21    History match: greeded before
+19:13:29  --- Roll on [Signet of the Dinomancers] (id=105108)
+19:13:29    quality=Epic  ilvl=528  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:13:29    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:13:29      [BisTooltip] item 105108 not in BiS database
+19:13:29      [BisTooltip] item 105108 not in BiS database
+19:13:29    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:13:29      [FrogBiS] specKey=Mistweaver Monk
+19:13:29      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:13:29      [FrogBiS] item 105108 not found in any list
+19:13:29      [FrogBiS] specKey=Mistweaver Monk
+19:13:29      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:13:29      [FrogBiS] item 105108 not found in any list
+19:13:29    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:13:29    Pawn check: isUpgrade=false
+19:13:30  --- Roll on [Ghostheart] (id=81247)
+19:13:30    quality=Rare  ilvl=463  type=Weapon  subType=Polearms  cached=true  retry=0
+19:13:30    Armor filter: subType=Polearms  playerType=Leather  isOff=false
+19:13:30      [BisTooltip] class=Monk  spec=Mistweaver
+19:13:30      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral
+19:13:30      [BisTooltip] class=Monk  spec=Mistweaver
+19:13:30      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral
+19:13:30    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:13:30      [FrogBiS] specKey=Mistweaver Monk
+19:13:30      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:13:30      [FrogBiS] item 81247 not found in any list
+19:13:30      [FrogBiS] specKey=Mistweaver Monk
+19:13:30      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:13:30      [FrogBiS] item 81247 not found in any list
+19:13:30    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:13:30    History match: greeded before
+19:13:30  --- Roll on [Leggings of Furious Flame] (id=105018)
+19:13:30    quality=Epic  ilvl=528  type=Armor  subType=Cloth  cached=true  retry=0
+19:13:30    Armor filter: subType=Cloth  playerType=Leather  isOff=true
+19:13:30  --- Roll on [Leggings of the Cursed Conqueror] (id=99675)
+19:13:30    quality=Epic  ilvl=528  type=Miscellaneous  subType=Junk  cached=true  retry=0
+19:13:30    Armor filter: subType=Junk  playerType=Leather  isOff=false
+19:13:30      [BisTooltip] item 99675 not in BiS database
+19:13:30      [BisTooltip] item 99675 not in BiS database
+19:13:30    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:13:30      [FrogBiS] specKey=Mistweaver Monk
+19:13:30      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:13:30      [FrogBiS] item 99675 not found in any list
+19:13:30      [FrogBiS] specKey=Mistweaver Monk
+19:13:30      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:13:30      [FrogBiS] item 99675 not found in any list
+19:13:30    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:13:30    Downgrade check (ilvl): equippedBetter=false  dropIlvl=528
+19:13:30    No rule matched — manual roll.
+19:13:30  --- Roll on [Mind's Eye Breastplate] (id=81256)
+19:13:30    quality=Rare  ilvl=463  type=Armor  subType=Plate  cached=true  retry=0
+19:13:30    Armor filter: subType=Plate  playerType=Leather  isOff=true
+19:13:30  --- Roll on [Shockstriker Gauntlets] (id=104937)
+19:13:30    quality=Epic  ilvl=528  type=Armor  subType=Plate  cached=true  retry=0
+19:13:30    Armor filter: subType=Plate  playerType=Leather  isOff=true
+19:17:21  --- Roll on [Flashfrozen Resin Globule] (id=81263)
+19:17:21    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:17:21    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:17:21      [BisTooltip] class=Monk  spec=Mistweaver
+19:17:21      [BisTooltip] No spec match. Item specs: Druid/Balance, Mage/Arcane, Mage/Fire, Mage/Frost, Priest/Shadow, Shaman/Elemental, Warlock/Affliction, Warlock/Demonology, Warlock/Destruction
+19:17:21      [BisTooltip] class=Monk  spec=Mistweaver
+19:17:21      [BisTooltip] No spec match. Item specs: Druid/Balance, Mage/Arcane, Mage/Fire, Mage/Frost, Priest/Shadow, Shaman/Elemental, Warlock/Affliction, Warlock/Demonology, Warlock/Destruction
+19:17:21    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:17:21      [FrogBiS] specKey=Mistweaver Monk
+19:17:21      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:17:21      [FrogBiS] item 81263 not found in any list
+19:17:21      [FrogBiS] specKey=Mistweaver Monk
+19:17:21      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:17:21      [FrogBiS] item 81263 not found in any list
+19:17:21    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:17:21    Pawn check: isUpgrade=false
+19:17:39  --- Roll on [Engraved Sword of the Earthshaker] (id=82279)
+19:17:39    quality=Uncommon  ilvl=429  type=Weapon  subType=One-Handed Swords  cached=true  retry=0
+19:17:39    Armor filter: subType=One-Handed Swords  playerType=Leather  isOff=false
+19:17:39      [BisTooltip] item 82279 not found directly, matched variant 82822
+19:17:39      [BisTooltip] class=Monk  spec=Mistweaver
+19:17:39      [BisTooltip] No spec match. Item specs: Death knight/Blood tank, Death knight/Unholy, Paladin/Retribution, Warrior/Arms, Warrior/Fury
+19:17:39      [BisTooltip] item 82279 not found directly, matched variant 82822
+19:17:39      [BisTooltip] class=Monk  spec=Mistweaver
+19:17:39      [BisTooltip] No spec match. Item specs: Death knight/Blood tank, Death knight/Unholy, Paladin/Retribution, Warrior/Arms, Warrior/Fury
+19:17:39    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:17:39      [FrogBiS] specKey=Mistweaver Monk
+19:17:39      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:17:39      [FrogBiS] item 82279 not found in any list
+19:17:39      [FrogBiS] specKey=Mistweaver Monk
+19:17:39      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:17:39      [FrogBiS] item 82279 not found in any list
+19:17:39    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:17:39    Pawn check: isUpgrade=false
+19:22:06  --- Roll on [Bombardment Bracers] (id=81276)
+19:22:06    quality=Rare  ilvl=463  type=Armor  subType=Cloth  cached=true  retry=0
+19:22:06    Armor filter: subType=Cloth  playerType=Leather  isOff=true
+19:24:46  --- Roll on [Vial of Ichorous Blood] (id=81264)
+19:24:46    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:24:46    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:24:46      [BisTooltip] class=Monk  spec=Mistweaver
+19:24:46      [BisTooltip] MATCH: Monk/Mistweaver
+19:24:46      [BisTooltip] class=Monk  spec=Mistweaver
+19:24:46      [BisTooltip] MATCH: Monk/Mistweaver
+19:24:46    BiS check [BisTooltip]: isBiS=true  collected=false  normalOfBiS=true
+19:25:31  --- Roll on [Waterfall Cord of the Feverflare] (id=82249)
+19:25:31    quality=Uncommon  ilvl=429  type=Armor  subType=Cloth  cached=true  retry=0
+19:25:31    Armor filter: subType=Cloth  playerType=Leather  isOff=true
+19:26:17  --- Roll on [Ner'onok's Razor Katar] (id=81286)
+19:26:17    quality=Rare  ilvl=463  type=Weapon  subType=Fist Weapons  cached=true  retry=0
+19:26:17    Armor filter: subType=Fist Weapons  playerType=Leather  isOff=false
+19:26:17      [BisTooltip] class=Monk  spec=Mistweaver
+19:26:17      [BisTooltip] No spec match. Item specs: Monk/Brewmaster, Monk/Windwalker, Rogue/Combat, Shaman/Enhancement
+19:26:17      [BisTooltip] class=Monk  spec=Mistweaver
+19:26:17      [BisTooltip] No spec match. Item specs: Monk/Brewmaster, Monk/Windwalker, Rogue/Combat, Shaman/Enhancement
+19:26:17    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:26:17      [FrogBiS] specKey=Mistweaver Monk
+19:26:17      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:17      [FrogBiS] item 81286 not found in any list
+19:26:17      [FrogBiS] specKey=Mistweaver Monk
+19:26:17      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:17      [FrogBiS] item 81286 not found in any list
+19:26:17    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:26:17    Pawn check: isUpgrade=false
+19:26:18  --- Roll on [Penetrating Gaze of Y'Shaarj] (id=105140)
+19:26:18    quality=Epic  ilvl=528  type=Armor  subType=Mail  cached=true  retry=0
+19:26:18    Armor filter: subType=Mail  playerType=Leather  isOff=true
+19:26:18  --- Roll on [Korgra's Venom-Soaked Gauntlets] (id=104987)
+19:26:18    quality=Epic  ilvl=528  type=Armor  subType=Leather  cached=true  retry=0
+19:26:18    Armor filter: subType=Leather  playerType=Leather  isOff=false
+19:26:18      [BisTooltip] item 104987 not in BiS database
+19:26:18      [BisTooltip] item 104987 not in BiS database
+19:26:18    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:26:18      [FrogBiS] specKey=Mistweaver Monk
+19:26:18      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:18      [FrogBiS] item 104987 not found in any list
+19:26:18      [FrogBiS] specKey=Mistweaver Monk
+19:26:18      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:18      [FrogBiS] item 104987 not found in any list
+19:26:18    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:26:18    Pawn check: isUpgrade=false
+19:26:18  --- Roll on [Ashflare Pendant] (id=105041)
+19:26:18    quality=Epic  ilvl=528  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:26:18    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:26:18      [BisTooltip] item 105041 not in BiS database
+19:26:18      [BisTooltip] item 105041 not in BiS database
+19:26:18    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:26:18      [FrogBiS] specKey=Mistweaver Monk
+19:26:18      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:18      [FrogBiS] item 105041 not found in any list
+19:26:18      [FrogBiS] specKey=Mistweaver Monk
+19:26:18      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:18      [FrogBiS] item 105041 not found in any list
+19:26:18    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:26:18    Pawn check: isUpgrade=false
+19:26:18  --- Roll on [Shoulders of the Cursed Conqueror] (id=99669)
+19:26:18    quality=Epic  ilvl=528  type=Miscellaneous  subType=Junk  cached=true  retry=0
+19:26:18    Armor filter: subType=Junk  playerType=Leather  isOff=false
+19:26:18      [BisTooltip] item 99669 not in BiS database
+19:26:18      [BisTooltip] item 99669 not in BiS database
+19:26:18    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:26:18      [FrogBiS] specKey=Mistweaver Monk
+19:26:18      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:18      [FrogBiS] item 99669 not found in any list
+19:26:18      [FrogBiS] specKey=Mistweaver Monk
+19:26:18      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:26:18      [FrogBiS] item 99669 not found in any list
+19:26:18    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:26:18    Downgrade check (ilvl): equippedBetter=false  dropIlvl=528
+19:26:18    No rule matched — manual roll.
+19:26:18  --- Roll on [Whisperwind Spaulders] (id=81291)
+19:26:18    quality=Rare  ilvl=463  type=Armor  subType=Cloth  cached=true  retry=0
+19:26:18    Armor filter: subType=Cloth  playerType=Leather  isOff=true
+19:28:03  --- Roll on [Yak Gauntlets of the Undertow] (id=82243)
+19:28:03    quality=Uncommon  ilvl=429  type=Armor  subType=Mail  cached=true  retry=0
+19:28:03    Armor filter: subType=Mail  playerType=Leather  isOff=true
+19:28:03  --- Roll on [Thresher Boots of the Galeburst] (id=82203)
+19:28:03    quality=Uncommon  ilvl=416  type=Armor  subType=Leather  cached=true  retry=0
+19:28:03    Armor filter: subType=Leather  playerType=Leather  isOff=false
+19:28:03      [BisTooltip] item 82203 not in BiS database
+19:28:03      [BisTooltip] item 82203 not in BiS database
+19:28:03    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:28:03      [FrogBiS] specKey=Mistweaver Monk
+19:28:03      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:28:03      [FrogBiS] item 82203 not found in any list
+19:28:03      [FrogBiS] specKey=Mistweaver Monk
+19:28:03      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:28:03      [FrogBiS] item 82203 not found in any list
+19:28:03    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:28:03    Pawn check: isUpgrade=false
+19:28:56  --- Roll on [Beastbinder Ring] (id=81563)
+19:28:56    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:28:56    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:28:56      [BisTooltip] class=Monk  spec=Mistweaver
+19:28:56      [BisTooltip] MATCH: Monk/Mistweaver
+19:28:56      [BisTooltip] class=Monk  spec=Mistweaver
+19:28:56      [BisTooltip] MATCH: Monk/Mistweaver
+19:28:56    BiS check [BisTooltip]: isBiS=true  collected=false  normalOfBiS=true
+19:30:57  --- Roll on [Harlan's Shoulders] (id=81698)
+19:30:57    quality=Rare  ilvl=463  type=Armor  subType=Mail  cached=true  retry=0
+19:30:57    Armor filter: subType=Mail  playerType=Leather  isOff=true
+19:33:16  --- Roll on [Ghost Iron Lockbox] (id=88567)
+19:33:16    quality=Uncommon  ilvl=90  type=Miscellaneous  subType=Junk  cached=true  retry=0
+19:33:16  --- Roll on [Trellised Wristwraps of the Wildfire] (id=82201)
+19:33:16    quality=Uncommon  ilvl=416  type=Armor  subType=Cloth  cached=true  retry=0
+19:33:16    Armor filter: subType=Cloth  playerType=Leather  isOff=true
+19:34:07  --- Roll on [Greatbelt of Living Waters] (id=104929)
+19:34:07    quality=Epic  ilvl=528  type=Armor  subType=Plate  cached=true  retry=0
+19:34:07    Armor filter: subType=Plate  playerType=Leather  isOff=true
+19:34:07  --- Roll on [Shoulders of the Cursed Conqueror] (id=99669)
+19:34:07    quality=Epic  ilvl=528  type=Miscellaneous  subType=Junk  cached=true  retry=0
+19:34:07    Armor filter: subType=Junk  playerType=Leather  isOff=false
+19:34:07      [BisTooltip] item 99669 not in BiS database
+19:34:07      [BisTooltip] item 99669 not in BiS database
+19:34:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 99669 not found in any list
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 99669 not found in any list
+19:34:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07    Downgrade check (ilvl): equippedBetter=false  dropIlvl=528
+19:34:07    No rule matched — manual roll.
+19:34:07  --- Roll on [Haromm's Frozen Crescent] (id=105037)
+19:34:07    quality=Epic  ilvl=528  type=Weapon  subType=One-Handed Axes  cached=true  retry=0
+19:34:07    Armor filter: subType=One-Handed Axes  playerType=Leather  isOff=false
+19:34:07      [BisTooltip] item 105037 not in BiS database
+19:34:07      [BisTooltip] item 105037 not in BiS database
+19:34:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 105037 not found in any list
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 105037 not found in any list
+19:34:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07    Pawn check: isUpgrade=false
+19:34:07  --- Roll on [Robes of Koegler] (id=82817)
+19:34:07    quality=Rare  ilvl=463  type=Armor  subType=Cloth  cached=true  retry=0
+19:34:07    Armor filter: subType=Cloth  playerType=Leather  isOff=true
+19:34:07  --- Roll on [Scorched Scarlet Key] (id=81564)
+19:34:07    quality=Rare  ilvl=463  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:34:07    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:34:07      [BisTooltip] class=Monk  spec=Mistweaver
+19:34:07      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral, Hunter/Beast mastery, Hunter/Marksmanship, Hunter/Survival, Monk/Brewmaster, Monk/Windwalker, Rogue/Assassination, Rogue/Combat, Rogue/Subtlety, Shaman/Enhancement
+19:34:07      [BisTooltip] class=Monk  spec=Mistweaver
+19:34:07      [BisTooltip] No spec match. Item specs: Druid/Guardian, Druid/Feral, Hunter/Beast mastery, Hunter/Marksmanship, Hunter/Survival, Monk/Brewmaster, Monk/Windwalker, Rogue/Assassination, Rogue/Combat, Rogue/Subtlety, Shaman/Enhancement
+19:34:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 81564 not found in any list
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 81564 not found in any list
+19:34:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07    Pawn check: isUpgrade=false
+19:34:07  --- Roll on [Sigil of Rampage] (id=105082)
+19:34:07    quality=Epic  ilvl=528  type=Armor  subType=Miscellaneous  cached=true  retry=0
+19:34:07    Armor filter: subType=Miscellaneous  playerType=Leather  isOff=false
+19:34:07      [BisTooltip] item 105082 not in BiS database
+19:34:07      [BisTooltip] item 105082 not in BiS database
+19:34:07    BiS check [BisTooltip]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 105082 not found in any list
+19:34:07      [FrogBiS] specKey=Mistweaver Monk
+19:34:07      [FrogBiS] Mistweaver Monk: 1 list(s)
+19:34:07      [FrogBiS] item 105082 not found in any list
+19:34:07    BiS check [FrogBiS]: isBiS=false  collected=false  normalOfBiS=false
+19:34:07    Downgrade check (ilvl): equippedBetter=false  dropIlvl=528
+19:34:07    No rule matched — manual roll.

@@ -199,3 +199,31 @@ function ItemUtil:IsLockbox(itemLink)
     end
     return false
 end
+
+------------------------------------------------------------------------
+-- Returns true when every slot the item could fill already has gear
+-- equipped whose ilvl exceeds the drop's ilvl by more than `delta`
+-- (default 30). Used by the BiS guard so a fully-geared player does
+-- not auto-need a clearly outclassed BiS item.
+-- Returns false if any slot is empty, within range, or data is missing.
+------------------------------------------------------------------------
+function ItemUtil:IsSignificantDowngrade(itemLink, delta)
+    delta = delta or 30
+    local slots = self:GetEquipSlots(itemLink)
+    if not slots then return false end
+
+    local _, _, _, dropIlvl = GetItemInfo(itemLink)
+    if not dropIlvl then return false end
+
+    for _, slotID in ipairs(slots) do
+        local eqLink = GetInventoryItemLink("player", slotID)
+        if not eqLink then
+            return false   -- empty slot: item could fill it
+        end
+        local _, _, _, eqIlvl = GetItemInfo(eqLink)
+        if not eqIlvl or (eqIlvl - dropIlvl) <= delta then
+            return false   -- this slot is within range → allow need
+        end
+    end
+    return true   -- every slot is significantly ahead of the drop
+end

@@ -207,12 +207,16 @@ function RollManager:EvaluateRoll(rollID, retryCount)
 
     --------------------------------------------------------------------
     -- BiS check: need if not collected, greed if already collected.
+    -- Guard: never auto-need if Pawn says the item is not an upgrade,
+    -- or if every relevant slot already has gear >30 ilvl above the
+    -- drop (player has clearly outgeared this version of the item).
     --------------------------------------------------------------------
     if GetSetting("bisNeedEnabled") then
-        local bisMatched   = false
-        local bisCollected = false
+        local bisMatched       = false
+        local bisCollected     = false
+        local bisBlockReason   = nil   -- set when the outgear guard fires
         for pName, provider in pairs(bisProviders) do
-            local isBiS      = provider:IsBiS(itemID)
+            local isBiS       = provider:IsBiS(itemID)
             local isCollected = provider:IsCollected(itemID)
             local isNormal    = provider:IsNormalVersionOfBiS(itemID)
             Debug("  BiS check [" .. pName .. "]: isBiS=" .. tostring(isBiS) .. "  collected=" .. tostring(isCollected) .. "  normalOfBiS=" .. tostring(isNormal))
@@ -220,23 +224,44 @@ function RollManager:EvaluateRoll(rollID, retryCount)
             if isBiS or isNormal then
                 bisMatched = true
                 if not isCollected then
-                    RollOnLoot(rollID, ROLL_NEED)
-                    self:Announce(itemLink, "NEED (BiS via " .. pName .. ")")
-                    if GetSetting("bisNotifyEnabled") ~= false and SLH.Notify then
-                        SLH.Notify:BiSNeed(itemLink)
+                    -- Outgear guard ------------------------------------------------
+                    -- 1. Pawn (most accurate): if it says not an upgrade, block.
+                    -- 2. Fallback ilvl check: block if every slot is >30 ilvl ahead.
+                    local pawnUpg = ItemUtil:PawnIsUpgrade(itemLink)
+                    local blocked = false
+                    if pawnUpg == false then
+                        blocked = true
+                        bisBlockReason = "not an upgrade (Pawn)"
+                        Debug("  BiS via " .. pName .. " blocked: Pawn says not an upgrade")
+                    elseif pawnUpg == nil and ItemUtil:IsSignificantDowngrade(itemLink) then
+                        blocked = true
+                        bisBlockReason = "outgeared (ilvl >" .. (ilvl or "?") .. ")"
+                        Debug("  BiS via " .. pName .. " blocked: equipped ilvl significantly higher than " .. tostring(ilvl))
                     end
-                    return
+                    -- -------------------------------------------------------------
+
+                    if blocked then
+                        bisCollected = true   -- fall through to greed path below
+                    else
+                        RollOnLoot(rollID, ROLL_NEED)
+                        self:Announce(itemLink, "NEED (BiS via " .. pName .. ")")
+                        if GetSetting("bisNotifyEnabled") ~= false and SLH.Notify then
+                            SLH.Notify:BiSNeed(itemLink)
+                        end
+                        return
+                    end
                 else
                     bisCollected = true
                 end
             end
         end
-        -- BiS item but already collected → auto-greed
+        -- BiS item but already collected or outgeared → auto-greed
         if bisMatched and bisCollected then
-            Debug("  BiS item already collected → GREED")
+            local reason = bisBlockReason or "already collected"
+            Debug("  BiS item → GREED (" .. reason .. ")")
             RollOnLoot(rollID, ROLL_GREED)
             History:RecordGreed(itemID)
-            self:Announce(itemLink, "GREED (BiS already collected)")
+            self:Announce(itemLink, "GREED (BiS: " .. reason .. ")")
             return
         end
     end
