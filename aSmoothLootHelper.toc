@@ -1,0 +1,19 @@
+## Interface: 50400
+## Title: aSmoothLootHelper
+## Notes: Automatically rolls greed on previously greeded items and items below an iLvl threshold.
+## Author: Hela
+## Version: 0.2.0
+## SavedVariables: aSmoothLootHelperDB
+## SavedVariablesPerCharacter: aSmoothLootHelperCharDB
+## OptionalDeps: Bistooltip, FrogBiS, Pawn
+
+Core\ItemUtil.lua
+Core\History.lua
+Core\StatWeights.lua
+Core\RollManager.lua
+Providers\BisTooltipProvider.lua
+Providers\FrogBiSProvider.lua
+UI\DebugLog.lua
+UI\Notify.lua
+UI\Options.lua
+aSmoothLootHelper.lua
