@@ -33,6 +33,7 @@ local CHAR_DEFAULTS = {
     bisNeedEnabled     = false,
     bisNotifyEnabled   = true,
     bisOffspecEnabled  = false,
+    lockboxRollMode    = "pass",   -- "off" / "pass" / "greed" / "need"
     collectedItems     = {},
 }
 
@@ -263,5 +264,5 @@ bootFrame:RegisterEvent("PLAYER_LOGIN")
 bootFrame:SetScript("OnEvent", function()
     InitDB()
     SLH.Options:BuildPanel()
-    print("|cff00ccff[SLH]|r v0.2.0 loaded. Use /slh for help.")
+    print("|cff00ccff[SLH]|r v0.3.0 loaded. Use /slh for help.")
 end)

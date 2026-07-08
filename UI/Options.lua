@@ -73,6 +73,10 @@ local function CreateSlider(y, label, dbTable, dbKey, minVal, maxVal, step)
     local valText = slider:CreateFontString(nil, "OVERLAY", FONT_NORMAL)
     valText:SetPoint("TOP", slider, "BOTTOM", 0, -2)
 
+    -- Initialise display text immediately
+    local initSliderVal = (dbTable[dbKey] ~= nil) and math.floor(dbTable[dbKey] + 0.5) or minVal
+    valText:SetText(tostring(initSliderVal))
+
     slider:SetScript("OnValueChanged", function(self, value)
         value = math.floor(value + 0.5)
         dbTable[dbKey] = value
@@ -98,7 +102,7 @@ local function CreateDropdown(y, label, dbTable, dbKey, choices)
         for _, c in ipairs(choices) do
             if c.value == value then return c.label end
         end
-        return value or "?"
+        return tostring(value)
     end
 
     UIDropDownMenu_SetWidth(dropdown, 160)
@@ -118,10 +122,17 @@ local function CreateDropdown(y, label, dbTable, dbKey, choices)
         end
     end)
 
+    -- Initialise display immediately (correct value shown before first Refresh)
+    local initVal = dbTable[dbKey]
+    if initVal == nil then initVal = choices[1].value end
+    UIDropDownMenu_SetSelectedValue(dropdown, initVal)
+    UIDropDownMenu_SetText(dropdown, GetLabel(initVal))
+
     widgets[#widgets + 1] = {
         type = "custom",
         refresh = function()
-            local val = dbTable[dbKey] or choices[1].value
+            local val = dbTable[dbKey]
+            if val == nil then val = choices[1].value end
             UIDropDownMenu_SetSelectedValue(dropdown, val)
             UIDropDownMenu_SetText(dropdown, GetLabel(val))
         end,
@@ -153,9 +164,9 @@ function Options:BuildPanel()
     CreateCheckbox(y, "Enable aSmoothLootHelper", db, "autoGreedEnabled")
     y = y - 28
     CreateCheckbox(y, "Debug mode (print roll decisions to chat)", db, "debugMode")
-    y = y - 18
-    CreateHelpText(y, "Shows detailed info for every loot roll: item, quality, armor type,\nand which rule was checked / matched.")
-    y = y - 34
+    y = y - 26
+    CreateHelpText(y, "Shows roll decisions in chat: item,\nquality, armor type, and which rule matched.")
+    y = y - 40
 
     local logBtn = CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
     logBtn:SetPoint("TOPLEFT", content, "TOPLEFT", LEFT_MARGIN + 30, y)
@@ -165,9 +176,9 @@ function Options:BuildPanel()
     y = y - 32
 
     CreateCheckbox(y, "Auto-greed on previously greeded items", db, "autoGreedOnHistory")
-    y = y - 18
-    CreateHelpText(y, "Items you've greeded before will be auto-greeded again (account-wide).")
-    y = y - 28
+    y = y - 26
+    CreateHelpText(y, "Items you've greeded before are auto-greeded\nagain (account-wide).")
+    y = y - 40
 
     ---------- Auto-Roll Mode ----------
     CreateTitle(y, "Auto-Roll Mode (per character)")
@@ -179,26 +190,22 @@ function Options:BuildPanel()
         { value = "need",  label = "Need on everything" },
     })
     y = y - 46
-    CreateHelpText(y, "Override all rolls for this character. Useful when boosting\n(Pass), farming on a geared main (Greed), or soloing old\ncontent (Need). Resets to Off when you log out.")
-    y = y - 48
+    CreateHelpText(y, "Override all rolls for this character.\nPass = boosting, Greed = farming,\nNeed = old content. Resets on logout.")
+    y = y - 56
 
     ---------- Session Memory ----------
     CreateCheckbox(y, "Session memory", charDB, "sessionMemoryEnabled")
-    y = y - 18
-    CreateHelpText(y, "Remembers what you manually rolled on each item this session.\nIf the same item drops again, repeats your last choice.\nClears when you log out.")
-    y = y - 48
+    y = y - 26
+    CreateHelpText(y, "Tracks what you roll this session.\nSame item dropping again gets the same\nroll. Clears when you log out.")
+    y = y - 56
 
     ---------- Armor Type Filter ----------
     CreateTitle(y, "Armor Type Filter (per character)")
     y = y - 28
     CreateCheckbox(y, "Filter by armor type", charDB, "armorFilterEnabled")
-    y = y - 18
-    CreateHelpText(y,
-        "When enabled, items that don't match your class armor type\n" ..
-        "(e.g. Cloth dropping for a Plate wearer) are automatically\n" ..
-        "greeded or passed. Weapons, rings, trinkets, and cloaks\n" ..
-        "are not affected.")
-    y = y - 60
+    y = y - 26
+    CreateHelpText(y, "Off-armor-type items are auto-greeded or\npassed. Weapons, rings, trinkets, and\ncloaks are never filtered.")
+    y = y - 56
     CreateDropdown(y, "Off-type armor action:", charDB, "armorFilterAction", {
         { value = "greed", label = "Greed" },
         { value = "pass",  label = "Pass" },
@@ -221,21 +228,21 @@ function Options:BuildPanel()
         { value = 3, label = "Rare (blue) or lower" },
     })
     y = y - 46
-    CreateHelpText(y, "Automatically roll the chosen action on items at or below\nthe selected quality. E.g. set Greed + Uncommon to auto-greed\nall greens and whites.")
-    y = y - 44
+    CreateHelpText(y, "Auto-roll on items at or below a set\nquality. E.g. Greed + Uncommon\nauto-greeds all greens and whites.")
+    y = y - 56
 
     ---------- Auto-Greed Downgrades ----------
     CreateTitle(y, "Auto-Greed Downgrades (per character)")
     y = y - 28
     CreateCheckbox(y, "Auto-greed items worse than equipped gear", charDB, "downgradeGreedEnabled")
-    y = y - 18
-    CreateHelpText(y, "Uses Pawn (if installed) or built-in stat weights (if configured below)\nto compare drops vs equipped gear. Falls back to ilvl comparison.\nItems scored worse get auto-greeded. Potential upgrades are left\nfor manual decision.")
-    y = y - 56
+    y = y - 26
+    CreateHelpText(y, "Uses Pawn or stat weights to compare drops\nvs. equipped gear (falls back to ilvl).\nWorse items are greeded; upgrades are not.")
+    y = y - 58
 
     ---------- Stat Weights ----------
     CreateTitle(y, "Stat Weights (per character)")
     y = y - 28
-    CreateHelpText(y, "Paste a Pawn import string to set stat weights for this character.\nGet weights from Wowhead, Icy Veins, or wowsims. These are used\nwhen the Pawn addon is not installed. Copy the string to share\nweights with alts of the same class/spec.")
+    CreateHelpText(y, "Paste a Pawn string to set weights for\nthis character. Get strings from Wowhead\nor Icy Veins. Used when Pawn is absent.")
     y = y - 56
 
     -- Status label
@@ -313,9 +320,9 @@ function Options:BuildPanel()
     CreateTitle(y, "Item Level Greed (per character)")
     y = y - 28
     CreateCheckbox(y, "Enable iLvl auto-greed", charDB, "ilvlGreedEnabled")
-    y = y - 18
-    CreateHelpText(y, "Auto-greed on any item at or below the threshold item level.")
-    y = y - 24
+    y = y - 26
+    CreateHelpText(y, "Auto-greeds items at or below the\nset ilvl threshold.")
+    y = y - 40
     CreateSlider(y, "iLvl threshold:", charDB, "ilvlGreedThreshold", 0, 600, 1)
     y = y - 60
 
@@ -323,17 +330,17 @@ function Options:BuildPanel()
     CreateTitle(y, "BiS Auto-Need (per character)")
     y = y - 28
     CreateCheckbox(y, "Enable BiS auto-need (requires BisTooltip or FrogBiS)", charDB, "bisNeedEnabled")
-    y = y - 18
-    CreateHelpText(y, "Auto-need on items on your BiS list that you haven't collected yet.")
-    y = y - 28
+    y = y - 26
+    CreateHelpText(y, "Auto-needs BiS items not yet collected.")
+    y = y - 26
     CreateCheckbox(y, "Include offspec items", charDB, "bisOffspecEnabled")
-    y = y - 18
-    CreateHelpText(y, "Also need on items that are BiS for other specs of your class.")
-    y = y - 28
+    y = y - 26
+    CreateHelpText(y, "Also need on items BiS for other specs.")
+    y = y - 26
     CreateCheckbox(y, "Show on-screen notification on BiS auto-need", charDB, "bisNotifyEnabled")
-    y = y - 18
-    CreateHelpText(y, "Displays a large message at the top of the screen when a BiS\nitem is auto-needed, so you don't miss it.")
-    y = y - 32
+    y = y - 26
+    CreateHelpText(y, "Shows a large on-screen message when\na BiS item is auto-needed.")
+    y = y - 40
 
     -- Provider status
     local providerLabel = content:CreateFontString(nil, "OVERLAY", FONT_NORMAL)
@@ -351,6 +358,20 @@ function Options:BuildPanel()
             end
         end,
     }
+    y = y - 26
+
+    ---------- Lockboxes ----------
+    CreateTitle(y, "Lockboxes (per character)")
+    y = y - 28
+    CreateDropdown(y, "Action on lockboxes:", charDB, "lockboxRollMode", {
+        { value = "off",   label = "Off (use normal rules)" },
+        { value = "pass",  label = "Pass" },
+        { value = "need",  label = "Need" },
+        { value = "greed", label = "Greed" },
+    })
+    y = y - 46
+    CreateHelpText(y, "Overrides all rules when a lockbox drops.\nUse Need for rogues, Pass to always skip,\nor Off to let normal rules apply.")
+    y = y - 56
 
     -- Set content height to fit everything
     content:SetHeight(math.abs(y) + 30)
@@ -372,9 +393,9 @@ function Options:Refresh()
         if w.type == "check" then
             w.widget:SetChecked(w.dbTable[w.dbKey] and true or false)
         elseif w.type == "slider" then
-            local val = w.dbTable[w.dbKey] or 0
+            local val = (w.dbTable[w.dbKey] ~= nil) and w.dbTable[w.dbKey] or 0
             w.widget:SetValue(val)
-            w.valText:SetText(tostring(val))
+            w.valText:SetText(tostring(math.floor(val + 0.5)))
         elseif w.type == "custom" and w.refresh then
             w.refresh()
         end

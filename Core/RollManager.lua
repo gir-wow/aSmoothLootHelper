@@ -151,6 +151,24 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     end
 
     --------------------------------------------------------------------
+    -- Lockbox handling — explicit per-character setting, bypasses all
+    -- other rules so rogues can always Need or everyone can always Pass.
+    --------------------------------------------------------------------
+    local lockboxMode = GetSetting("lockboxRollMode")
+    if lockboxMode and lockboxMode ~= "off" then
+        if ItemUtil:IsLockbox(itemLink) then
+            local rollType = ROLL_PASS
+            if lockboxMode == "greed" then rollType = ROLL_GREED
+            elseif lockboxMode == "need" then rollType = ROLL_NEED
+            end
+            RollOnLoot(rollID, rollType)
+            if rollType == ROLL_GREED then History:RecordGreed(itemID) end
+            self:Announce(itemLink, ROLL_LABEL[rollType] .. " (lockbox)")
+            return
+        end
+    end
+
+    --------------------------------------------------------------------
     -- Armor-type filter
     --------------------------------------------------------------------
     if GetSetting("armorFilterEnabled") and itemSubType then

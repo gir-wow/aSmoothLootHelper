@@ -182,3 +182,20 @@ function ItemUtil:PawnIsUpgrade(itemLink)
         return false   -- Pawn says not an upgrade
     end
 end
+
+------------------------------------------------------------------------
+-- Returns true if the item is a lockbox (Container > Lockbox subtype,
+-- or name contains "lockbox" as a locale-independent fallback).
+------------------------------------------------------------------------
+function ItemUtil:IsLockbox(itemLink)
+    if not itemLink then return false end
+    local name, _, _, _, _, itemType, itemSubType = GetItemInfo(itemLink)
+    if itemType == "Container" and itemSubType == "Lockbox" then
+        return true
+    end
+    -- Fallback: name-based check (covers "Strong Junkbox", "Gnomish Lock Box", etc.)
+    if name and name:lower():find("lockbox") then
+        return true
+    end
+    return false
+end
