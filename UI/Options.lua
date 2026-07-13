@@ -70,20 +70,38 @@ local function CreateSlider(y, label, dbTable, dbKey, minVal, maxVal, step)
     slider.Low:SetText(tostring(minVal))
     slider.High:SetText(tostring(maxVal))
 
-    local valText = slider:CreateFontString(nil, "OVERLAY", FONT_NORMAL)
-    valText:SetPoint("TOP", slider, "BOTTOM", 0, -2)
+    -- Editable value box to the right of the slider
+    local valBox = CreateFrame("EditBox", nil, content, "InputBoxTemplate")
+    valBox:SetPoint("LEFT", slider, "RIGHT", 8, 0)
+    valBox:SetSize(52, 20)
+    valBox:SetAutoFocus(false)
+    valBox:SetNumeric(true)
+    valBox:SetMaxLetters(4)
 
-    -- Initialise display text immediately
+    -- Initialise
     local initSliderVal = (dbTable[dbKey] ~= nil) and math.floor(dbTable[dbKey] + 0.5) or minVal
-    valText:SetText(tostring(initSliderVal))
+    valBox:SetText(tostring(initSliderVal))
+    slider:SetValue(initSliderVal)
 
     slider:SetScript("OnValueChanged", function(self, value)
         value = math.floor(value + 0.5)
         dbTable[dbKey] = value
-        valText:SetText(tostring(value))
+        valBox:SetText(tostring(value))
     end)
 
-    widgets[#widgets + 1] = { type = "slider", widget = slider, dbTable = dbTable, dbKey = dbKey, valText = valText }
+    valBox:SetScript("OnEnterPressed", function(self)
+        local val = tonumber(self:GetText()) or minVal
+        val = math.max(minVal, math.min(maxVal, math.floor(val + 0.5)))
+        dbTable[dbKey] = val
+        slider:SetValue(val)   -- triggers OnValueChanged which updates the box
+        self:ClearFocus()
+    end)
+    valBox:SetScript("OnEscapePressed", function(self)
+        self:SetText(tostring(dbTable[dbKey] or minVal))
+        self:ClearFocus()
+    end)
+
+    widgets[#widgets + 1] = { type = "slider", widget = slider, dbTable = dbTable, dbKey = dbKey, valText = valBox }
     return slider
 end
 
@@ -163,6 +181,10 @@ function Options:BuildPanel()
     y = y - 28
     CreateCheckbox(y, "Enable aSmoothLootHelper", db, "autoGreedEnabled")
     y = y - 28
+    CreateCheckbox(y, "Show minimap icon", charDB, "minimapIconEnabled")
+    y = y - 26
+    CreateHelpText(y, "Toggles the minimap button. Changes take\neffect after reloading the UI (/reload).")
+    y = y - 40
     CreateCheckbox(y, "Debug mode (print roll decisions to chat)", db, "debugMode")
     y = y - 26
     CreateHelpText(y, "Shows roll decisions in chat: item,\nquality, armor type, and which rule matched.")
@@ -325,6 +347,22 @@ function Options:BuildPanel()
     y = y - 40
     CreateSlider(y, "iLvl threshold:", charDB, "ilvlGreedThreshold", 0, 600, 1)
     y = y - 60
+
+    ---------- Transmog Need ----------
+    CreateTitle(y, "Transmog Need (per character)")
+    y = y - 28
+    CreateCheckbox(y, "Need appearances not yet collected", charDB, "transmogNeedEnabled")
+    y = y - 26
+    CreateHelpText(y, "Auto-needs any item whose appearance you\nhaven't learned yet. Runs before the armor\nfilter so off-type appearances are included.")
+    y = y - 56
+
+    ---------- Tier Token Need ----------
+    CreateTitle(y, "Tier Token (per character)")
+    y = y - 28
+    CreateCheckbox(y, "Auto-need tier tokens for your class", charDB, "tierTokenNeedEnabled")
+    y = y - 26
+    CreateHelpText(y, "Needs tokens matching your class group\n(Protector/Conqueror/Vanquisher). Skips if\nyou already carry that token. Passes wrong-\nclass tokens automatically.")
+    y = y - 56
 
     ---------- BiS Auto-Need ----------
     CreateTitle(y, "BiS Auto-Need (per character)")

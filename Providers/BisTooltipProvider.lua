@@ -8,6 +8,14 @@ local _, SLH = ...
 --   Bistooltip_char_equipment[itemID] → 1 (bags) or 2 (equipped), or nil
 --   Bistooltip_classes_indexes        → { ["Death knight"] = 1, ... }
 --
+-- Bistooltip_items is NOT a static table — BisTooltip reassigns it to either
+--   Bistooltip_wh_items    (Wowhead,    data_source = "wh")
+--   Bistooltip_wowtbc_items (wowtbc.gg, data_source = "wowtbc")
+-- based on the user's "Data source" dropdown in the BisTooltip BiS List UI
+-- (stored in BisTooltipAddon.db.char.data_source / BisTooltipDB).
+-- Reading Bistooltip_items at call-time therefore always reflects the
+-- user's currently active source — no extra handling needed here.
+--
 -- BisTooltip uses class names like "Death knight" and spec names like
 -- "Blood tank", "Balance", "Retribution", etc.
 ------------------------------------------------------------------------
@@ -73,6 +81,32 @@ local function IsMatchingID(itemID, targetID)
 end
 
 ------------------------------------------------------------------------
+-- Return the phase index the user has selected in BisTooltip (1-based).
+-- Stored in BistooltipAddon.db.char.phase_index.
+-- Returns nil if the DB isn't readable yet (disables phase filtering).
+------------------------------------------------------------------------
+local function GetBisTooltipPhaseIndex()
+    if BistooltipAddon and BistooltipAddon.db and BistooltipAddon.db.char then
+        return BistooltipAddon.db.char.phase_index
+    end
+    return nil
+end
+
+------------------------------------------------------------------------
+-- Return true if the ranks string has a non-"-" rank for phaseIndex.
+-- Ranks format from BisTooltip data: "N / M"  (slash-separated).
+-- Returns true (no filtering) when phaseIndex or ranksStr is absent.
+------------------------------------------------------------------------
+local function IsRankedForPhase(ranksStr, phaseIndex)
+    if not phaseIndex or not ranksStr or ranksStr == "" then return true end
+    local parts = { strsplit("/", ranksStr) }
+    local part  = parts[phaseIndex]
+    if not part then return true end          -- phase index out of range
+    part = part:match("^%s*(.-)%s*$")         -- trim surrounding whitespace
+    return part ~= "-" and part ~= ""
+end
+
+------------------------------------------------------------------------
 local function Debug(msg)
     local db = aSmoothLootHelperDB
     if db and db.settings and db.settings.debugMode then
@@ -118,16 +152,34 @@ function provider:IsBiS(itemID)
     if not className then return false end
 
     local checkOffspec = aSmoothLootHelperCharDB and aSmoothLootHelperCharDB.bisOffspecEnabled
+    local phaseIndex   = GetBisTooltipPhaseIndex()
 
     local specList = {}
     for _, entry in ipairs(entries) do
         specList[#specList + 1] = entry.class_name .. "/" .. entry.spec_name
         if entry.class_name == className then
-            if checkOffspec then
+            -- Verify at least one slot on this entry is ranked for the
+            -- player's selected phase. An item ranked only in an earlier
+            -- phase (rank = "N / -") is not auto-needed in later phases.
+            local rankedForPhase = false
+            if entry.slots then
+                for _, slot in ipairs(entry.slots) do
+                    if IsRankedForPhase(slot.ranks, phaseIndex) then
+                        rankedForPhase = true
+                        break
+                    end
+                end
+            else
+                rankedForPhase = true  -- no slot data, don't filter
+            end
+
+            if not rankedForPhase then
+                Debug("    [BisTooltip] SKIP (not ranked in phase " .. tostring(phaseIndex) .. "): "
+                      .. entry.class_name .. "/" .. entry.spec_name)
+            elseif checkOffspec then
                 Debug("    [BisTooltip] MATCH (offspec): " .. entry.spec_name)
                 return true
-            end
-            if entry.spec_name == specName then
+            elseif entry.spec_name == specName then
                 Debug("    [BisTooltip] MATCH: " .. entry.class_name .. "/" .. entry.spec_name)
                 return true
             end

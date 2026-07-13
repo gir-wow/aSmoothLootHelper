@@ -80,6 +80,104 @@ function ItemUtil:GetPlayerArmorType()
 end
 
 ------------------------------------------------------------------------
+-- Primary-stat detection
+--
+-- Pure classes never change primary stat regardless of spec:
+--   Strength — Death Knight, Warrior
+--   Agility  — Rogue, Hunter
+--   Intellect — Mage, Priest, Warlock
+--
+-- Hybrid classes depend on the active spec:
+--   Paladin    Holy=Int,  Protection=Str, Retribution=Str
+--   Druid      Balance=Int, Feral=Agi, Guardian=Agi, Restoration=Int
+--   Shaman     Elemental=Int, Enhancement=Agi, Restoration=Int
+--   Monk       Brewmaster=Agi, Mistweaver=Int, Windwalker=Agi
+------------------------------------------------------------------------
+local PURE_CLASS_STAT = {
+    DEATHKNIGHT = "STRENGTH",
+    WARRIOR     = "STRENGTH",
+    ROGUE       = "AGILITY",
+    HUNTER      = "AGILITY",
+    MAGE        = "INTELLECT",
+    PRIEST      = "INTELLECT",
+    WARLOCK     = "INTELLECT",
+}
+
+-- Hybrid spec names → primary stat (English client; MoP spec names are stable)
+local HYBRID_SPEC_STAT = {
+    -- Paladin
+    ["Holy"]         = "INTELLECT",
+    ["Protection"]   = "STRENGTH",
+    ["Retribution"]  = "STRENGTH",
+    -- Druid
+    ["Balance"]      = "INTELLECT",
+    ["Feral"]        = "AGILITY",
+    ["Guardian"]     = "AGILITY",
+    -- Shaman
+    ["Elemental"]    = "INTELLECT",
+    ["Enhancement"]  = "AGILITY",
+    -- Monk
+    ["Brewmaster"]   = "AGILITY",
+    ["Mistweaver"]   = "INTELLECT",
+    ["Windwalker"]   = "AGILITY",
+    -- Restoration covers both Druid and Shaman
+    ["Restoration"]  = "INTELLECT",
+}
+
+------------------------------------------------------------------------
+-- Return the primary stat the current player/spec wants:
+-- "STRENGTH", "AGILITY", or "INTELLECT".  Returns nil if undetermined.
+------------------------------------------------------------------------
+function ItemUtil:GetPlayerExpectedPrimaryStat()
+    local _, classToken = UnitClass("player")
+    if PURE_CLASS_STAT[classToken] then
+        return PURE_CLASS_STAT[classToken]
+    end
+    -- Hybrid: resolve via active spec name
+    local getSpec = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization
+                    or GetSpecialization
+    local getInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo
+                    or GetSpecializationInfo
+    if not getSpec then return nil end
+    local idx = getSpec()
+    if not idx or idx == 0 then return nil end
+    local _, specName = getInfo(idx)
+    return specName and HYBRID_SPEC_STAT[specName] or nil
+end
+
+------------------------------------------------------------------------
+-- Return the dominant primary stat of an item: "STRENGTH", "AGILITY",
+-- "INTELLECT", or nil if the item has no primary stat (e.g. a ring
+-- without Str/Agi/Int, or item data not yet cached).
+------------------------------------------------------------------------
+function ItemUtil:GetItemPrimaryStat(itemLink)
+    if not itemLink or not GetItemStats then return nil end
+    local stats = GetItemStats(itemLink)
+    if not stats then return nil end
+    local str = stats["ITEM_MOD_STRENGTH_SHORT"]  or 0
+    local agi = stats["ITEM_MOD_AGILITY_SHORT"]   or 0
+    local int = stats["ITEM_MOD_INTELLECT_SHORT"]  or 0
+    if str == 0 and agi == 0 and int == 0 then return nil end
+    if str >= agi and str >= int then return "STRENGTH"  end
+    if agi >= int               then return "AGILITY"   end
+    return "INTELLECT"
+end
+
+------------------------------------------------------------------------
+-- Returns true if the item has a clear primary stat that is wrong for
+-- the player's current class/spec.  Only triggers for items that
+-- actually have a primary stat (weapons and armor pieces); neutral
+-- items (rings without Str/Agi/Int, trinkets, cloaks) return false.
+------------------------------------------------------------------------
+function ItemUtil:IsWrongPrimaryStatForPlayer(itemLink)
+    local itemStat   = self:GetItemPrimaryStat(itemLink)
+    if not itemStat then return false end          -- no primary stat, neutral
+    local expected   = self:GetPlayerExpectedPrimaryStat()
+    if not expected  then return false end          -- can't determine, don't filter
+    return itemStat ~= expected
+end
+
+------------------------------------------------------------------------
 -- Returns true if the item is equippable armor that does NOT match
 -- the player's primary armor type.  Non-armor items (weapons, rings,
 -- trinkets, cloaks, misc, shields) return false — they are neutral.
@@ -226,4 +324,94 @@ function ItemUtil:IsSignificantDowngrade(itemLink, delta)
         end
     end
     return true   -- every slot is significantly ahead of the drop
+end
+
+------------------------------------------------------------------------
+-- Returns true if the player already has the given itemID in their
+-- bags (0-4) or equipped (slots 0-18).  Checks exact ID only — no
+-- warforged offsets — because for "do I already own this token" we
+-- want an exact match.
+------------------------------------------------------------------------
+function ItemUtil:IsInBagsOrEquipped(itemID)
+    if not itemID then return false end
+    -- Equipped
+    for slot = 0, 18 do
+        if GetInventoryItemID("player", slot) == itemID then return true end
+    end
+    -- Bags
+    local getNumSlots = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
+    local getItemID   = (C_Container and C_Container.GetContainerItemID)   or GetContainerItemID
+    if getNumSlots and getItemID then
+        for bag = 0, (NUM_BAG_SLOTS or 4) do
+            for slot = 1, (getNumSlots(bag) or 0) do
+                if getItemID(bag, slot) == itemID then return true end
+            end
+        end
+    end
+    return false
+end
+
+------------------------------------------------------------------------
+-- Tier token detection
+--
+-- In MoP, tier tokens are Miscellaneous/Junk items whose name ends with
+-- "Protector", "Conqueror", or "Vanquisher".  Each token type maps to a
+-- fixed set of classes across all MoP tiers (T14 Mogu'shan/HoF/TES,
+-- T15 ToT, T16 SoO):
+--
+--   PROTECTOR  → Warrior, Hunter, Shaman, Monk
+--   CONQUEROR  → Paladin, Priest, Warlock
+--   VANQUISHER → Death Knight, Druid, Mage, Rogue
+------------------------------------------------------------------------
+local TIER_TOKEN_SUFFIXES = {
+    ["Protector"] = "PROTECTOR",
+    ["Conqueror"]  = "CONQUEROR",
+    ["Vanquisher"] = "VANQUISHER",
+}
+
+local CLASS_TO_TOKEN_TYPE = {
+    WARRIOR     = "PROTECTOR",
+    HUNTER      = "PROTECTOR",
+    SHAMAN      = "PROTECTOR",
+    MONK        = "PROTECTOR",
+    PALADIN     = "CONQUEROR",
+    PRIEST      = "CONQUEROR",
+    WARLOCK     = "CONQUEROR",
+    DEATHKNIGHT = "VANQUISHER",
+    DRUID       = "VANQUISHER",
+    MAGE        = "VANQUISHER",
+    ROGUE       = "VANQUISHER",
+}
+
+------------------------------------------------------------------------
+-- Return "PROTECTOR", "CONQUEROR", or "VANQUISHER" if the item is a
+-- MoP tier token, or nil if it is not.
+------------------------------------------------------------------------
+function ItemUtil:GetTierTokenType(itemLink)
+    if not itemLink then return nil end
+    local name = GetItemInfo(itemLink)
+    if not name then return nil end
+    for suffix, tokenType in pairs(TIER_TOKEN_SUFFIXES) do
+        if name:find(suffix, 1, true) then
+            return tokenType
+        end
+    end
+    return nil
+end
+
+------------------------------------------------------------------------
+-- Returns true if the item is any MoP tier token.
+------------------------------------------------------------------------
+function ItemUtil:IsTierToken(itemLink)
+    return self:GetTierTokenType(itemLink) ~= nil
+end
+
+------------------------------------------------------------------------
+-- Returns true if the tier token is for the player's class/token group.
+------------------------------------------------------------------------
+function ItemUtil:IsTierTokenForPlayer(itemLink)
+    local tokenType = self:GetTierTokenType(itemLink)
+    if not tokenType then return false end
+    local _, classToken = UnitClass("player")
+    return CLASS_TO_TOKEN_TYPE[classToken] == tokenType
 end

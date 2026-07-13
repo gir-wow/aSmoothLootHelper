@@ -22,6 +22,8 @@ local CHAR_DEFAULTS = {
     autoRollMode       = "off",    -- "off" / "pass" / "greed" / "need"
     qualityRollMode    = "off",    -- "off" / "pass" / "greed" / "need"
     qualityThreshold   = 0,        -- 0=off, 2=Uncommon(green) or lower, 3=Rare(blue) or lower
+    minimapIconEnabled = true,     -- show / hide the minimap button
+    minimapAngle       = 225,      -- saved drag angle (degrees)
     sessionMemoryEnabled = false,
     armorFilterEnabled = false,
     armorFilterAction  = "greed",  -- "greed" / "pass"
@@ -33,6 +35,8 @@ local CHAR_DEFAULTS = {
     bisNeedEnabled     = false,
     bisNotifyEnabled   = true,
     bisOffspecEnabled  = false,
+    transmogNeedEnabled  = false,   -- auto-need appearances not yet collected
+    tierTokenNeedEnabled = false,   -- auto-need tier tokens for your class
     lockboxRollMode    = "pass",   -- "off" / "pass" / "greed" / "need"
     collectedItems     = {},
 }

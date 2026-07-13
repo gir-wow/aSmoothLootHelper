@@ -151,6 +151,73 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     end
 
     --------------------------------------------------------------------
+    -- Tier token auto-need
+    --
+    -- Need a tier token when:
+    --   1. It is for the player's class/token-group.
+    --   2. Player is NOT already carrying a copy in bags/equipped.
+    --
+    -- TODO (future): also skip when the player already owns the tier
+    -- piece(s) this token grants for main spec OR offspec.  This
+    -- requires a token-ID → tier-piece-IDs lookup table for MoP
+    -- T14/T15/T16 that does not yet exist in the codebase.  Once that
+    -- table is added, check bisProviders[*]:IsCollected() for each
+    -- piece the token can produce.
+    --------------------------------------------------------------------
+    if GetSetting("tierTokenNeedEnabled") then
+        if ItemUtil:IsTierTokenForPlayer(itemLink) then
+            if ItemUtil:IsInBagsOrEquipped(itemID) then
+                Debug("  Tier token: already carrying this token — skip")
+                -- fall through to normal rules (will likely greed or manual)
+            else
+                Debug("  Tier token: for player class, not in bags — NEED")
+                RollOnLoot(rollID, ROLL_NEED)
+                self:Announce(itemLink, "NEED (tier token for your class)")
+                return
+            end
+        elseif ItemUtil:IsTierToken(itemLink) then
+            -- Token is not for this class — pass it
+            Debug("  Tier token: wrong class token — PASS")
+            RollOnLoot(rollID, ROLL_PASS)
+            self:Announce(itemLink, "PASS (tier token, wrong class)")
+            return
+        end
+    end
+
+    --------------------------------------------------------------------
+    -- Transmog need: auto-need any item whose appearance the player
+    -- hasn't collected yet.  Runs before the armor filter so the player
+    -- can collect off-type appearances when transmog mode is on.
+    -- Uses C_TransmogCollection.PlayerHasTransmog (available in MoP Classic).
+    --
+    -- C_Transmog.CanTransmogItem returns:
+    --   canBeChanged, noChangeReason, canBeSource, noSourceReason
+    -- We need the 3rd return value (canBeSource) — it returns false for
+    -- BoP items this class cannot equip, which is exactly the right gate.
+    --------------------------------------------------------------------
+    if GetSetting("transmogNeedEnabled") then
+        local canSource = false
+        if C_Transmog and C_Transmog.CanTransmogItem then
+            local _, _, canBeSource = C_Transmog.CanTransmogItem(itemLink)
+            canSource = canBeSource == true
+        end
+        Debug("  Transmog check: canSource=" .. tostring(canSource))
+        if canSource then
+            local hasTransmog = C_TransmogCollection
+                                and C_TransmogCollection.PlayerHasTransmog
+                                and C_TransmogCollection.PlayerHasTransmog(itemID)
+            Debug("  Transmog check: hasTransmog=" .. tostring(hasTransmog))
+            if not hasTransmog then
+                RollOnLoot(rollID, ROLL_NEED)
+                self:Announce(itemLink, "NEED (transmog: appearance not collected)")
+                return
+            else
+                Debug("  Transmog: appearance already collected")
+            end
+        end
+    end
+
+    --------------------------------------------------------------------
     -- Lockbox handling — explicit per-character setting, bypasses all
     -- other rules so rogues can always Need or everyone can always Pass.
     --------------------------------------------------------------------
@@ -172,14 +239,19 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     -- Armor-type filter
     --------------------------------------------------------------------
     if GetSetting("armorFilterEnabled") and itemSubType then
-        local isOff = ItemUtil:IsOffArmorType(itemLink)
-        Debug("  Armor filter: subType=" .. tostring(itemSubType) .. "  playerType=" .. tostring(ItemUtil:GetPlayerArmorType()) .. "  isOff=" .. tostring(isOff))
-        if isOff then
+        local isOffType = ItemUtil:IsOffArmorType(itemLink)
+        local isWrongStat = not isOffType and ItemUtil:IsWrongPrimaryStatForPlayer(itemLink)
+        Debug("  Armor filter: subType=" .. tostring(itemSubType)
+              .. "  playerType=" .. tostring(ItemUtil:GetPlayerArmorType())
+              .. "  isOffType=" .. tostring(isOffType)
+              .. "  isWrongStat=" .. tostring(isWrongStat))
+        if isOffType or isWrongStat then
+            local reason = isWrongStat and "wrong-stat" or "off-armor"
             local action = GetSetting("armorFilterAction") or "greed"
             local rollType = (action == "pass") and ROLL_PASS or ROLL_GREED
             RollOnLoot(rollID, rollType)
             if rollType == ROLL_GREED then History:RecordGreed(itemID) end
-            self:Announce(itemLink, ROLL_LABEL[rollType] .. " (off-armor)")
+            self:Announce(itemLink, ROLL_LABEL[rollType] .. " (" .. reason .. ")")
             return
         end
     end
