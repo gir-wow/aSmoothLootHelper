@@ -147,6 +147,24 @@ git tag -a v1.1.0 -m "v1.1.0"   # release
 # 3. Push commit + tag — webhook fires automatically
 git push origin master
 git push origin v1.1.0
+
+# 4. Create GitHub release
+gh release create v1.1.0 --title "v1.1.0" --notes "v1.1.0
+- Added X
+- Fixed Y
+- Improved Z"
+```
+
+### Release notes format
+
+Version number on the first line, bullet list of changes. Keep it short.
+
+```
+v1.1.0
+- Phase-aware BiS filtering for BisTooltip
+- Primary stat filter catches wrong-stat armor (e.g. Intellect plate for DK)
+- Tier token auto-need with Protector/Conqueror/Vanquisher detection
+- Transmog need mode using C_TransmogCollection API
 ```
 
 CurseForge will package and publish within a minute or two of the tag push.
