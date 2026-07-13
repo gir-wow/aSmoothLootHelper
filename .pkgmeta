@@ -1,0 +1,12 @@
+package-as: aSmoothLootHelper
+
+ignore:
+  # Internal planning and design documents
+  - PUBLISHING.md
+  - MINIMAP_ICON.md
+  - OPTIONS_REDESIGN.md
+  - ADDON_PLAN.md
+  # Development logs
+  - logs
+  # Deployment scripts
+  - scripts
