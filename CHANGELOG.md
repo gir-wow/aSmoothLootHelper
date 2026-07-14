@@ -1,5 +1,22 @@
 # aSmoothLootHelper Changelog
 
+## v1.2.0
+
+### New Features
+- BiS Preview window — scrollable list of all BiS items organized by slot
+- Shows predicted roll action (NEED/GREED/PASS) with reason for each item
+- Difficulty variants (Normal/Heroic/Celestial) generated automatically
+- Filter buttons: All / Need only / No Pass
+- Greyed-out items for outgeared/collected (still hoverable for tooltips)
+- Shift-click to link items to chat
+- Accessible via minimap right-click menu or `/slh bis`
+- Async item loading via Item:ContinueOnItemLoad with 8s timeout fallback
+
+### Improvements
+- Always enforces armor type and primary stat checks in preview
+- Name-based tier token detection fallback for MoP Classic compatibility
+- Tier tokens correctly show PASS for wrong-class tokens
+
 ## v1.1.2
 
 - Updated changelog format

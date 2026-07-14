@@ -234,6 +234,9 @@ local function HandleSlash(msg)
             print("  (Too many to list. Use /slh reset to clear.)")
         end
 
+    elseif cmd == "bis" then
+        SLH.BisPreview:Toggle()
+
     elseif cmd == "debuglog" then
         SLH.DebugLog:Toggle()
 
@@ -282,6 +285,7 @@ local function HandleSlash(msg)
         print("  /slh armor off  - Disable armor-type filter")
         print("  /slh ilvl <N>   - Set iLvl threshold for this character")
         print("  /slh ilvl off   - Disable iLvl auto-greed")
+        print("  /slh bis        - Open BiS preview window")
         print("  /slh debuglog   - Open/close the debug log viewer")
         print("  /slh history    - Show greed history summary")
         print("  /slh reset      - Clear greed history")
@@ -312,6 +316,7 @@ bootFrame:SetScript("OnEvent", function()
     InitDB()
     SLH.History:MigrateFromAccount()
     SLH.Options:BuildPanel()
+    SLH.BisPreview:Init()
     SLH.MinimapIcon:Init()
     print("|cff00ccff[SLH]|r v1.1.2 loaded. Use /slh for help.")
 end)

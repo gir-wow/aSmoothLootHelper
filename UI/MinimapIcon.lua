@@ -204,6 +204,13 @@ local function BuildMenu()
     end
     UIDropDownMenu_AddButton(info)
 
+    -- BiS Preview
+    info = UIDropDownMenu_CreateInfo()
+    info.text          = "BiS Preview"
+    info.notCheckable  = true
+    info.func          = function() SLH.BisPreview:Toggle() end
+    UIDropDownMenu_AddButton(info)
+
     -- Debug log
     info = UIDropDownMenu_CreateInfo()
     info.text          = "Show debug log"
