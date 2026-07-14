@@ -2,7 +2,7 @@
 ## Title: aSmoothLootHelper
 ## Notes: Automatically rolls greed on previously greeded items and items below an iLvl threshold.
 ## Author: Aldur
-## Version: 1.1.1
+## Version: 1.1.2
 ## SavedVariables: aSmoothLootHelperDB
 ## SavedVariablesPerCharacter: aSmoothLootHelperCharDB
 ## OptionalDeps: Bistooltip, FrogBiS, Pawn, AtlasLootClassic

@@ -1,5 +1,9 @@
 # aSmoothLootHelper Changelog
 
+## v1.1.2
+
+- Updated changelog format
+
 ## v1.1.1
 
 ### New Features
