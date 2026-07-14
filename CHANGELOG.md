@@ -17,3 +17,19 @@
 - Cross-difficulty BiS matching via name fallback
 - iLvl threshold slider textbox display fix
 - Minimap icon circular mask
+
+## v1.0.1
+
+- AtlasLoot Favourites BiS provider
+- Publishing format update
+
+## v1.0.0
+
+- Phase-aware BiS auto-need (BisTooltip + FrogBiS)
+- Primary stat armor filter (pass/greed off-type)
+- Tier token auto-need with class group detection
+- Transmog auto-need for uncollected appearances
+- Editable iLvl threshold slider
+- Minimap icon settings
+- BiS outgear guard (skip need when Pawn says no or ilvl gap >30)
+- Options layout fixes, lockbox roll setting, default values display
