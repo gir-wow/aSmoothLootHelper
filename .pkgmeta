@@ -1,5 +1,9 @@
 package-as: aSmoothLootHelper
 
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
 ignore:
   # Internal planning and design documents
   - PUBLISHING.md
