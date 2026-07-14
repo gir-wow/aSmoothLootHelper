@@ -4,11 +4,24 @@ SLH.History = {}
 local History = SLH.History
 
 ------------------------------------------------------------------------
+-- History is stored per-character in aSmoothLootHelperCharDB.greedHistory.
+------------------------------------------------------------------------
+
+local function GetDB()
+    local cdb = aSmoothLootHelperCharDB
+    if not cdb then return nil end
+    if not cdb.greedHistory then
+        cdb.greedHistory = {}
+    end
+    return cdb.greedHistory
+end
+
+------------------------------------------------------------------------
 -- Check if the player has previously greeded on this itemID.
 ------------------------------------------------------------------------
 function History:HasGreeded(itemID)
     if not itemID then return false end
-    local db = aSmoothLootHelperDB and aSmoothLootHelperDB.greedHistory
+    local db = GetDB()
     return db and db[itemID] ~= nil
 end
 
@@ -17,18 +30,15 @@ end
 ------------------------------------------------------------------------
 function History:RecordGreed(itemID)
     if not itemID then return end
-    local db = aSmoothLootHelperDB
+    local db = GetDB()
     if not db then return end
-    if not db.greedHistory then
-        db.greedHistory = {}
-    end
 
-    local entry = db.greedHistory[itemID]
+    local entry = db[itemID]
     if entry then
         entry.count    = entry.count + 1
         entry.lastSeen = time()
     else
-        db.greedHistory[itemID] = { count = 1, lastSeen = time() }
+        db[itemID] = { count = 1, lastSeen = time() }
     end
 end
 
@@ -36,8 +46,7 @@ end
 -- Return the full greedHistory table (or empty table).
 ------------------------------------------------------------------------
 function History:GetAll()
-    local db = aSmoothLootHelperDB
-    return (db and db.greedHistory) or {}
+    return GetDB() or {}
 end
 
 ------------------------------------------------------------------------
@@ -52,10 +61,32 @@ function History:GetCount()
 end
 
 ------------------------------------------------------------------------
--- Wipe the entire greed history.
+-- Wipe the entire greed history for this character.
 ------------------------------------------------------------------------
 function History:Reset()
-    if aSmoothLootHelperDB then
-        aSmoothLootHelperDB.greedHistory = {}
+    if aSmoothLootHelperCharDB then
+        aSmoothLootHelperCharDB.greedHistory = {}
     end
+end
+
+------------------------------------------------------------------------
+-- One-time migration: move account-wide history into this character's
+-- DB so every alt starts fresh. Only runs once per character.
+------------------------------------------------------------------------
+function History:MigrateFromAccount()
+    local cdb = aSmoothLootHelperCharDB
+    local adb = aSmoothLootHelperDB
+    if not cdb or not adb then return end
+    if cdb._migratedHistory then return end
+
+    if adb.greedHistory and next(adb.greedHistory) then
+        -- Copy account history into this character's history
+        if not cdb.greedHistory then cdb.greedHistory = {} end
+        for itemID, entry in pairs(adb.greedHistory) do
+            if not cdb.greedHistory[itemID] then
+                cdb.greedHistory[itemID] = { count = entry.count, lastSeen = entry.lastSeen }
+            end
+        end
+    end
+    cdb._migratedHistory = true
 end

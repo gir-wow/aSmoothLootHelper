@@ -299,6 +299,113 @@ function ItemUtil:IsLockbox(itemLink)
 end
 
 ------------------------------------------------------------------------
+-- Detect which inventory slot a tier token represents by matching
+-- keywords in the item name.  Returns a slot ID (1-based), or nil if
+-- the slot cannot be determined.
+--
+-- MoP tier tokens and Celestial tokens always name the slot first:
+--   "Crown/Helm/Hood/…"        → head   (1)
+--   "Spaulders/Mantle/…"       → shoulders (3)
+--   "Chest/Robe/Hauberk/…"     → chest  (5)
+--   "Leggings/Legguards/Kilt…" → legs   (7)
+--   "Gloves/Gauntlets/…"       → hands  (10)
+------------------------------------------------------------------------
+local TOKEN_SLOT_KEYWORDS = {
+    { pattern = "crown",       slot = 1  },
+    { pattern = "helm",        slot = 1  },
+    { pattern = "hood",        slot = 1  },
+    { pattern = "headguard",   slot = 1  },
+    { pattern = "headpiece",   slot = 1  },
+    { pattern = "coif",        slot = 1  },
+    { pattern = "circlet",     slot = 1  },
+    { pattern = "cover",       slot = 1  },
+    { pattern = "cap",         slot = 1  },
+    { pattern = "spaulder",    slot = 3  },
+    { pattern = "shoulder",    slot = 3  },
+    { pattern = "mantle",      slot = 3  },
+    { pattern = "pauldron",    slot = 3  },
+    { pattern = "chest",       slot = 5  },
+    { pattern = "robe",        slot = 5  },
+    { pattern = "tunic",       slot = 5  },
+    { pattern = "breastplate", slot = 5  },
+    { pattern = "hauberk",     slot = 5  },
+    { pattern = "vest",        slot = 5  },
+    { pattern = "leg",         slot = 7  },
+    { pattern = "breeche",     slot = 7  },
+    { pattern = "kilt",        slot = 7  },
+    { pattern = "trouser",     slot = 7  },
+    { pattern = "glove",       slot = 10 },
+    { pattern = "gauntlet",    slot = 10 },
+    { pattern = "handguard",   slot = 10 },
+    { pattern = "grip",        slot = 10 },
+    { pattern = "mitts",       slot = 10 },
+    { pattern = "fist",        slot = 10 },
+}
+
+function ItemUtil:GetTierTokenSlot(itemLink)
+    if not itemLink then return nil end
+    local name = GetItemInfo(itemLink)
+    if not name then return nil end
+    local lower = name:lower()
+    for _, entry in ipairs(TOKEN_SLOT_KEYWORDS) do
+        if lower:find(entry.pattern, 1, true) then
+            return entry.slot
+        end
+    end
+    return nil
+end
+
+------------------------------------------------------------------------
+-- Returns true when the equipped item in the slot the token represents
+-- is more than `delta` ilvl (default 30) ahead of the token's ilvl.
+-- Falls back to average equipped ilvl when the slot cannot be detected.
+-- Used by the tier-token outgear guard because tokens have no equip
+-- slot and cannot use IsSignificantDowngrade directly.
+------------------------------------------------------------------------
+function ItemUtil:IsTokenSignificantDowngrade(itemLink, delta)
+    delta = delta or 30
+    local _, _, _, tokenIlvl = GetItemInfo(itemLink)
+    if not tokenIlvl or tokenIlvl == 0 then return false end
+
+    -- Primary path: compare against the specific slot the token covers.
+    local slot = self:GetTierTokenSlot(itemLink)
+    if slot then
+        local eqLink = GetInventoryItemLink("player", slot)
+        if not eqLink then return false end   -- slot empty → could be an upgrade
+        local _, _, _, eqIlvl = GetItemInfo(eqLink)
+        if not eqIlvl then return false end
+        local diff = eqIlvl - tokenIlvl
+        Debug("  Token slot check: slot=" .. slot
+              .. "  equippedIlvl=" .. eqIlvl
+              .. "  tokenIlvl=" .. tokenIlvl
+              .. "  diff=" .. diff)
+        return diff > delta
+    end
+
+    -- Fallback: slot keyword not found — compare against average ilvl
+    -- across main gear slots (requires ≥8 slots to be confident).
+    -- Use delta=0 here too: if average gear is ahead of the token at
+    -- all, the player should not be auto-needing it.
+    local CHECK_SLOTS = { 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }
+    local totalIlvl, count = 0, 0
+    for _, slotID in ipairs(CHECK_SLOTS) do
+        local eqLink = GetInventoryItemLink("player", slotID)
+        if eqLink then
+            local _, _, _, eqIlvl = GetItemInfo(eqLink)
+            if eqIlvl and eqIlvl > 0 then
+                totalIlvl = totalIlvl + eqIlvl
+                count     = count + 1
+            end
+        end
+    end
+    if count < 8 then return false end
+    local avgIlvl = totalIlvl / count
+    Debug("  Token avg-ilvl fallback: avg=" .. string.format("%.1f", avgIlvl)
+          .. "  tokenIlvl=" .. tokenIlvl)
+    return avgIlvl > tokenIlvl
+end
+
+------------------------------------------------------------------------
 -- Returns true when every slot the item could fill already has gear
 -- equipped whose ilvl exceeds the drop's ilvl by more than `delta`
 -- (default 30). Used by the BiS guard so a fully-geared player does
@@ -386,13 +493,20 @@ local CLASS_TO_TOKEN_TYPE = {
 ------------------------------------------------------------------------
 -- Return "PROTECTOR", "CONQUEROR", or "VANQUISHER" if the item is a
 -- MoP tier token, or nil if it is not.
+-- Guards:
+--   1. Item type must be Miscellaneous/Junk (tokens are not armor).
+--   2. The suffix must appear at the END of the name to avoid false
+--      positives like "Shield of the Protectorate" matching "Protector".
 ------------------------------------------------------------------------
 function ItemUtil:GetTierTokenType(itemLink)
     if not itemLink then return nil end
-    local name = GetItemInfo(itemLink)
+    local name, _, _, _, _, itemType, itemSubType = GetItemInfo(itemLink)
     if not name then return nil end
+    -- Tier tokens are typed as Miscellaneous/Junk, not Armor
+    if itemType ~= "Miscellaneous" and itemType ~= "Junk" then return nil end
     for suffix, tokenType in pairs(TIER_TOKEN_SUFFIXES) do
-        if name:find(suffix, 1, true) then
+        -- Match only when the name ends with the suffix
+        if name:sub(-#suffix) == suffix then
             return tokenType
         end
     end

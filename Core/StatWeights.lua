@@ -157,13 +157,121 @@ function StatWeights:IsDropDowngrade(itemLink, weights)
 end
 
 ------------------------------------------------------------------------
--- Get the active weights for the current character.
+-- Get the active weights for the current character (main spec).
+-- Checks source preference: Pawn addon first, then imported profiles.
 -- Returns weights table or nil.
 ------------------------------------------------------------------------
 function StatWeights:GetActiveWeights()
     local cdb = aSmoothLootHelperCharDB
-    if not cdb or not cdb.statWeights then return nil end
-    return cdb.statWeights
+    if not cdb then return nil end
+
+    local source = cdb.statWeightSource or "pawn"
+
+    -- Pawn source: use Pawn's live scoring (no local weights needed)
+    if source == "pawn" and cdb.statWeightPawnMain then
+        -- Return a sentinel so callers know Pawn is handling it
+        -- Actual scoring goes through PawnGetScaleValue in the downgrade check
+        return nil  -- let PawnIsUpgrade handle it
+    end
+
+    -- Import source: use stored profile
+    if cdb.statWeightProfiles and cdb.statWeightProfiles.main then
+        return cdb.statWeightProfiles.main.weights
+    end
+
+    -- Legacy fallback
+    if cdb.statWeights then return cdb.statWeights end
+    return nil
+end
+
+------------------------------------------------------------------------
+-- Get offspec weights (import source only).
+------------------------------------------------------------------------
+function StatWeights:GetOffspecWeights()
+    local cdb = aSmoothLootHelperCharDB
+    if not cdb then return nil end
+    if cdb.statWeightProfiles and cdb.statWeightProfiles.offspec then
+        return cdb.statWeightProfiles.offspec.weights
+    end
+    return nil
+end
+
+------------------------------------------------------------------------
+-- Get available Pawn scale names (requires Pawn addon loaded).
+-- Returns a list of scale name strings, or empty table if Pawn absent.
+------------------------------------------------------------------------
+function StatWeights:GetPawnScales()
+    if not PawnGetAllScales then return {} end
+    local scales = PawnGetAllScales()
+    if not scales then return {} end
+
+    -- Get the player's class for filtering
+    local _, playerClass = UnitClass("player")
+    local className = (playerClass or ""):lower()
+    -- Also get localised class name for matching scale display names
+    local localisedClass = UnitClass("player") or ""
+    local localisedLower = localisedClass:lower()
+
+    local allScales = {}
+    if scales[1] then
+        for _, name in ipairs(scales) do
+            allScales[#allScales + 1] = name
+        end
+    else
+        for name in pairs(scales) do
+            allScales[#allScales + 1] = name
+        end
+    end
+    table.sort(allScales)
+
+    -- Filter: keep scales that match the player's class.
+    -- Strategy 1: PawnGetScaleClassID (if available) returns classID.
+    -- Strategy 2: Check if scale name contains the class name.
+    -- Strategy 3: Check if the scale is marked as visible/enabled for this char.
+    local filtered = {}
+    local playerClassID = select(3, UnitClass("player"))
+
+    for _, name in ipairs(allScales) do
+        local dominated = false
+
+        -- Try PawnGetScaleClassID (Pawn 2.x+)
+        if PawnGetScaleClassID then
+            local scaleClassID = PawnGetScaleClassID(name)
+            if scaleClassID and scaleClassID > 0 and scaleClassID ~= playerClassID then
+                dominated = true
+            end
+        elseif PawnGetScaleData then
+            -- PawnGetScaleData returns a table with .ClassID field
+            local data = PawnGetScaleData(name)
+            if data and data.ClassID and data.ClassID > 0 and data.ClassID ~= playerClassID then
+                dominated = true
+            end
+        end
+
+        -- Fallback: name-based matching if no API data found the class
+        if not dominated and not PawnGetScaleClassID and not PawnGetScaleData then
+            local lower = name:lower()
+            if not lower:find(className, 1, true) and not lower:find(localisedLower, 1, true) then
+                -- Heuristic: if the scale name contains another class name, skip it
+                local otherClasses = {"warrior","paladin","hunter","rogue","priest","shaman",
+                                      "mage","warlock","monk","druid","death knight","deathknight"}
+                for _, other in ipairs(otherClasses) do
+                    if other ~= className and lower:find(other, 1, true) then
+                        dominated = true
+                        break
+                    end
+                end
+            end
+        end
+
+        if not dominated then
+            filtered[#filtered + 1] = name
+        end
+    end
+
+    -- If filtering removed everything, fall back to full list
+    if #filtered == 0 then return allScales end
+    return filtered
 end
 
 ------------------------------------------------------------------------
@@ -172,10 +280,42 @@ end
 function StatWeights:GetSummary()
     local cdb = aSmoothLootHelperCharDB
     if not cdb then return "Not configured" end
+
+    local source = cdb.statWeightSource or "pawn"
+
+    if source == "pawn" then
+        local main = cdb.statWeightPawnMain
+        local off  = cdb.statWeightPawnOffspec
+        if main then
+            local txt = "Pawn: " .. main
+            if off then txt = txt .. " / " .. off end
+            return txt
+        end
+        -- No Pawn scale selected but source is pawn
+        if PawnGetAllScales then
+            return "Pawn (no scale selected)"
+        end
+        return "Pawn not detected"
+    end
+
+    -- Import source
+    if cdb.statWeightProfiles and cdb.statWeightProfiles.main then
+        local prof = cdb.statWeightProfiles.main
+        local count = 0
+        if prof.weights then
+            for _ in pairs(prof.weights) do count = count + 1 end
+        end
+        local txt = (prof.name or "Custom") .. " (" .. count .. " stats)"
+        if cdb.statWeightProfiles.offspec then
+            txt = txt .. " + offspec"
+        end
+        return txt
+    end
+
+    -- Legacy
     local name = cdb.statWeightsName or "Custom"
     local w = cdb.statWeights
     if not w or not next(w) then return "Not configured" end
-
     local count = 0
     for _ in pairs(w) do count = count + 1 end
     return name .. " (" .. count .. " stats)"

@@ -37,6 +37,20 @@ local HWF_OFFSET = 543
 local NWF_OFFSET = 747
 
 ------------------------------------------------------------------------
+-- SoO difficulty item ID offsets.
+-- In MoP SoO, the same item at different difficulties uses different
+-- item IDs. These are the most common offsets between versions:
+--   LFR base → Normal: +137   (or Normal → LFR: -137)
+--   Normal → Heroic: +543     (HWF_OFFSET)
+--   LFR → Heroic: varies
+--   Celestial items share LFR IDs
+-- Because offsets are not perfectly consistent across all items, we
+-- also do a name-based fallback match.
+------------------------------------------------------------------------
+local DIFFICULTY_OFFSETS = { 0, 137, -137, HWF_OFFSET, -HWF_OFFSET, NWF_OFFSET, -NWF_OFFSET,
+                             543 + 137, -(543 + 137), 747 + 137, -(747 + 137) }
+
+------------------------------------------------------------------------
 -- Return the player's FrogBiS-style spec key, e.g. "Balance Druid".
 ------------------------------------------------------------------------
 local function GetPlayerSpecKey()
@@ -123,24 +137,70 @@ local function GetAllBiSListsForSpec(specKey)
 end
 
 ------------------------------------------------------------------------
--- Check if an itemID matches target, accounting for warforged variants.
+-- Check if an itemID matches target, accounting for warforged variants
+-- AND cross-difficulty variants (LFR/Normal/Heroic have different IDs
+-- in SoO).
 ------------------------------------------------------------------------
 local function IsMatchingID(itemID, targetID)
     if itemID == targetID then return true end
-    return itemID == targetID + HWF_OFFSET
-        or itemID == targetID - HWF_OFFSET
-        or itemID == targetID + NWF_OFFSET
-        or itemID == targetID - NWF_OFFSET
+    for _, offset in ipairs(DIFFICULTY_OFFSETS) do
+        if offset ~= 0 and itemID == targetID + offset then
+            return true
+        end
+    end
+    return false
+end
+
+------------------------------------------------------------------------
+-- Name-based item matching cache.  Built lazily from the BiS lists.
+-- Maps normalised item name → true for all items in any active list.
+------------------------------------------------------------------------
+local nameCache = {}
+local nameCacheBuilt = false
+
+local function BuildNameCache(specsToCheck)
+    wipe(nameCache)
+    for _, specKey in ipairs(specsToCheck) do
+        local allLists = GetAllBiSListsForSpec(specKey)
+        for _, listInfo in ipairs(allLists) do
+            if listInfo.items then
+                for _, entry in ipairs(listInfo.items) do
+                    if entry.id then
+                        local name = GetItemInfo(entry.id)
+                        if name then
+                            nameCache[name:lower()] = entry.id
+                        end
+                    end
+                end
+            end
+        end
+    end
+    nameCacheBuilt = true
 end
 
 ------------------------------------------------------------------------
 -- Check whether the given itemID appears in a BiS item list.
+-- Falls back to name matching if ID matching fails.
 ------------------------------------------------------------------------
 local function ItemInList(itemID, items)
     if not items then return false end
     for _, entry in ipairs(items) do
         if entry.id and IsMatchingID(itemID, entry.id) then
             return true
+        end
+    end
+    return false
+end
+
+local function ItemInListByName(itemName, items)
+    if not itemName or not items then return false end
+    local lower = itemName:lower()
+    for _, entry in ipairs(items) do
+        if entry.id then
+            local entryName = GetItemInfo(entry.id)
+            if entryName and entryName:lower() == lower then
+                return true
+            end
         end
     end
     return false
@@ -158,32 +218,107 @@ local function Debug(msg)
 end
 
 ------------------------------------------------------------------------
+-- Parse a bisMainSpec/bisOffspec value which may be either:
+--   "Blood Death Knight"              → check all lists for that spec
+--   "Blood Death Knight::SetName"     → check only the named set
+-- Returns: specKey, setName (setName is nil for all-lists mode)
+------------------------------------------------------------------------
+local function ParseSpecSetting(setting)
+    if not setting then return nil, nil end
+    local specKey, setName = setting:match("^(.-)::(.+)$")
+    if specKey and setName then
+        return specKey, setName
+    end
+    return setting, nil
+end
+
+------------------------------------------------------------------------
+-- Get lists filtered by an optional set name restriction.
+-- If setName is nil, returns all lists for the spec.
+-- If setName is specified, returns only the matching named set.
+------------------------------------------------------------------------
+local function GetFilteredLists(specKey, setName)
+    if setName then
+        -- Only check the specific named set
+        if FrogBiSDB and FrogBiSDB.sets and FrogBiSDB.sets[specKey] then
+            for _, s in ipairs(FrogBiSDB.sets[specKey]) do
+                if s.name == setName and s.items and #s.items > 0 then
+                    return { { source = "set:" .. setName, items = s.items } }
+                end
+            end
+        end
+        return {}
+    end
+    return GetAllBiSListsForSpec(specKey)
+end
+
+------------------------------------------------------------------------
 -- IsBiS: Is this item on ANY BiS list for the player's current
 -- spec (or any class spec if offspec is enabled)?
+-- Respects bisMainSpec/bisOffspec overrides from Options.
+-- Supports "specKey::setName" format for specific set selection.
 -- Checks ALL sets (template + custom + named), not just the active one.
 ------------------------------------------------------------------------
 function provider:IsBiS(itemID)
-    local checkOffspec = aSmoothLootHelperCharDB and aSmoothLootHelperCharDB.bisOffspecEnabled
-    local specsToCheck = {}
+    local charDB = aSmoothLootHelperCharDB
+    local checkOffspec = charDB and charDB.bisOffspecEnabled
+
+    -- Parse main spec setting
+    local mainRaw = charDB and charDB.bisMainSpec
+    local mainSpec, mainSetName
+    if mainRaw and mainRaw ~= "" then
+        mainSpec, mainSetName = ParseSpecSetting(mainRaw)
+    else
+        mainSpec = GetPlayerSpecKey()
+    end
+
+    -- Build list of {specKey, setName} pairs to check
+    local checksToRun = {}
+    if mainSpec then
+        checksToRun[#checksToRun + 1] = { spec = mainSpec, setFilter = mainSetName }
+    end
 
     if checkOffspec then
-        specsToCheck = GetAllClassSpecKeys()
-        Debug("    [FrogBiS] checking offspec, specs: " .. table.concat(specsToCheck, ", "))
+        local offRaw = charDB and charDB.bisOffspec
+        if offRaw and offRaw ~= "" then
+            local offSpec, offSetName = ParseSpecSetting(offRaw)
+            checksToRun[#checksToRun + 1] = { spec = offSpec, setFilter = offSetName }
+            Debug("    [FrogBiS] main=" .. tostring(mainSpec) .. (mainSetName and ("::" .. mainSetName) or "")
+                  .. " offspec=" .. offSpec .. (offSetName and ("::" .. offSetName) or ""))
+        else
+            -- No explicit offspec: check all class specs (all lists)
+            local allSpecs = GetAllClassSpecKeys()
+            for _, sk in ipairs(allSpecs) do
+                checksToRun[#checksToRun + 1] = { spec = sk, setFilter = nil }
+            end
+            Debug("    [FrogBiS] checking all class specs")
+        end
     else
-        local specKey = GetPlayerSpecKey()
-        Debug("    [FrogBiS] specKey=" .. tostring(specKey))
-        if specKey then
-            specsToCheck = { specKey }
+        Debug("    [FrogBiS] specKey=" .. tostring(mainSpec) .. (mainSetName and ("::" .. mainSetName) or ""))
+    end
+
+    for _, check in ipairs(checksToRun) do
+        local allLists = GetFilteredLists(check.spec, check.setFilter)
+        Debug("    [FrogBiS] " .. check.spec .. (check.setFilter and ("::" .. check.setFilter) or "") .. ": " .. #allLists .. " list(s)")
+        for _, listInfo in ipairs(allLists) do
+            if ItemInList(itemID, listInfo.items) then
+                Debug("    [FrogBiS] MATCH in " .. check.spec .. " / " .. listInfo.source)
+                return true
+            end
         end
     end
 
-    for _, specKey in ipairs(specsToCheck) do
-        local allLists = GetAllBiSListsForSpec(specKey)
-        Debug("    [FrogBiS] " .. specKey .. ": " .. #allLists .. " list(s)")
-        for _, listInfo in ipairs(allLists) do
-            if ItemInList(itemID, listInfo.items) then
-                Debug("    [FrogBiS] MATCH in " .. specKey .. " / " .. listInfo.source)
-                return true
+    -- Fallback: name-based matching for cross-difficulty variants
+    -- (e.g. Celestial/LFR version of a Normal BiS item)
+    local dropName = GetItemInfo(itemID)
+    if dropName then
+        for _, check in ipairs(checksToRun) do
+            local allLists = GetFilteredLists(check.spec, check.setFilter)
+            for _, listInfo in ipairs(allLists) do
+                if ItemInListByName(dropName, listInfo.items) then
+                    Debug("    [FrogBiS] NAME MATCH '" .. dropName .. "' in " .. check.spec .. " / " .. listInfo.source)
+                    return true
+                end
             end
         end
     end

@@ -72,23 +72,47 @@ local function GetFavourites()
     return nil
 end
 
+local DIFFICULTY_OFFSETS = { HWF_OFFSET, -HWF_OFFSET, NWF_OFFSET, -NWF_OFFSET,
+                             137, -137, 543 + 137, -(543 + 137), 747 + 137, -(747 + 137) }
+
 ------------------------------------------------------------------------
--- Check itemID AND its warforged variants against a single list table.
+-- Check itemID AND its warforged/difficulty variants against a single
+-- list table.
 ------------------------------------------------------------------------
 local function CheckListForID(list, itemID)
     if not list then return false end
-    return list[itemID]
-        or list[itemID + HWF_OFFSET]
-        or list[itemID - HWF_OFFSET]
-        or list[itemID + NWF_OFFSET]
-        or list[itemID - NWF_OFFSET]
+    if list[itemID] then return true end
+    for _, offset in ipairs(DIFFICULTY_OFFSETS) do
+        if list[itemID + offset] then return true end
+    end
+    return false
+end
+
+------------------------------------------------------------------------
+-- Name-based fallback: check if the dropped item's name matches any
+-- favourited item's name (for cross-difficulty variants where ID
+-- offsets don't work).
+------------------------------------------------------------------------
+local function CheckListForName(list, itemName)
+    if not list or not itemName then return false end
+    local lowerName = itemName:lower()
+    for favID in pairs(list) do
+        if type(favID) == "number" then
+            local favName = GetItemInfo(favID)
+            if favName and favName:lower() == lowerName then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 ------------------------------------------------------------------------
 -- Fallback: scan the raw SavedVariables when the live module isn't ready.
 -- Checks ALL lists across ALL profiles and global.
+-- If byName is provided, also does name-based matching.
 ------------------------------------------------------------------------
-local function IsFavouriteInDB(itemID)
+local function IsFavouriteInDB(itemID, byName)
     local db = AtlasLootClassicDB
     if not db then return false end
 
@@ -99,6 +123,7 @@ local function IsFavouriteInDB(itemID)
     if globalFav and globalFav.lists then
         for _, list in pairs(globalFav.lists) do
             if CheckListForID(list, itemID) then return true end
+            if byName and CheckListForName(list, byName) then return true end
         end
     end
 
@@ -109,6 +134,7 @@ local function IsFavouriteInDB(itemID)
             if profFav and profFav.lists then
                 for _, list in pairs(profFav.lists) do
                     if CheckListForID(list, itemID) then return true end
+                    if byName and CheckListForName(list, byName) then return true end
                 end
             end
         end
@@ -122,6 +148,8 @@ end
 ------------------------------------------------------------------------
 function provider:IsBiS(itemID)
     local fav = GetFavourites()
+    local dropName = GetItemInfo(itemID)   -- for name-based fallback
+
     if fav then
         -- Check the exact ID via the live API
         local result = fav:IsFavouriteItemID(itemID)
@@ -129,20 +157,25 @@ function provider:IsBiS(itemID)
             Debug("    [AtlasLoot] favourited (live): " .. itemID)
             return true
         end
-        -- Also check warforged variants (live API only checks exact ID)
-        for _, offset in ipairs({ HWF_OFFSET, -HWF_OFFSET, NWF_OFFSET, -NWF_OFFSET }) do
+        -- Check all difficulty/warforged variants
+        for _, offset in ipairs(DIFFICULTY_OFFSETS) do
             local variant = itemID + offset
             if fav:IsFavouriteItemID(variant) then
-                Debug("    [AtlasLoot] favourited via warforged variant " .. variant .. " (live)")
+                Debug("    [AtlasLoot] favourited via variant " .. variant .. " (live)")
                 return true
             end
+        end
+        -- Name-based fallback against the DB (live API has no name search)
+        if dropName and IsFavouriteInDB(itemID, dropName) then
+            Debug("    [AtlasLoot] favourited by name '" .. dropName .. "' (DB fallback)")
+            return true
         end
         Debug("    [AtlasLoot] not in favourites (live): " .. itemID)
         return false
     end
 
-    -- SavedVariables fallback
-    local result = IsFavouriteInDB(itemID)
+    -- SavedVariables fallback (with name matching)
+    local result = IsFavouriteInDB(itemID, dropName)
     Debug("    [AtlasLoot] not in favourites (DB fallback): " .. itemID .. " = " .. tostring(result))
     return result
 end

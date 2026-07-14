@@ -19,24 +19,32 @@ local DB_DEFAULTS = {
 -- Per-character saved-variable defaults
 ------------------------------------------------------------------------
 local CHAR_DEFAULTS = {
+    playMode           = "raiding",  -- "raiding" / "farming" / "carry" / "custom"
     autoRollMode       = "off",    -- "off" / "pass" / "greed" / "need"
     qualityRollMode    = "off",    -- "off" / "pass" / "greed" / "need"
     qualityThreshold   = 0,        -- 0=off, 2=Uncommon(green) or lower, 3=Rare(blue) or lower
     minimapIconEnabled = true,     -- show / hide the minimap button
     minimapAngle       = 225,      -- saved drag angle (degrees)
-    sessionMemoryEnabled = false,
-    armorFilterEnabled = false,
-    armorFilterAction  = "greed",  -- "greed" / "pass"
+    sessionMemoryEnabled = true,
+    armorFilterEnabled = true,
+    armorFilterAction  = "pass",   -- "greed" / "pass"
     downgradeGreedEnabled = true,
-    statWeights        = nil,       -- table of ITEM_MOD_X = weight
-    statWeightsName    = nil,       -- display name from Pawn string
+    statWeights        = nil,       -- table of ITEM_MOD_X = weight (legacy, migrated)
+    statWeightsName    = nil,       -- display name from Pawn string (legacy, migrated)
+    statWeightSource   = "pawn",    -- "pawn" | "import"
+    statWeightProfiles = nil,       -- { main = { name, weights }, offspec = { name, weights } }
+    statWeightPawnMain    = nil,    -- Pawn scale name selected for main spec
+    statWeightPawnOffspec = nil,    -- Pawn scale name selected for offspec
     ilvlGreedEnabled   = false,
     ilvlGreedThreshold = 0,
-    bisNeedEnabled     = false,
+    bisNeedEnabled     = true,
     bisNotifyEnabled   = true,
     bisOffspecEnabled  = false,
+    bisMainSpec        = nil,       -- FrogBiS/BisTooltip spec key for main spec
+    bisOffspec         = nil,       -- FrogBiS/BisTooltip spec key for offspec
+    bisProviderEnabled = nil,       -- { BisTooltip=true, FrogBiS=true, AtlasLoot=true } or nil (all enabled)
     transmogNeedEnabled  = false,   -- auto-need appearances not yet collected
-    tierTokenNeedEnabled = false,   -- auto-need tier tokens for your class
+    tierTokenNeedEnabled = true,    -- auto-need tier tokens for your class
     lockboxRollMode    = "pass",   -- "off" / "pass" / "greed" / "need"
     collectedItems     = {},
 }
@@ -79,6 +87,31 @@ local function InitDB()
             end
         end
     end
+
+    -- Migration: existing characters without playMode were configured
+    -- manually under the old UI. Set them to "custom" so we don't
+    -- overwrite their settings unexpectedly.
+    if aSmoothLootHelperCharDB._migratedPlayMode == nil then
+        -- If playMode was just filled in by the default loop above but
+        -- the character already had other keys set (old install), use custom.
+        if aSmoothLootHelperCharDB.playMode == "raiding"
+           and aSmoothLootHelperCharDB.armorFilterEnabled == false then
+            aSmoothLootHelperCharDB.playMode = "custom"
+        end
+        aSmoothLootHelperCharDB._migratedPlayMode = true
+    end
+
+    -- Migration: old single statWeights → statWeightProfiles.main
+    if aSmoothLootHelperCharDB.statWeights and not aSmoothLootHelperCharDB._migratedStatProfiles then
+        aSmoothLootHelperCharDB.statWeightProfiles = {
+            main = {
+                name    = aSmoothLootHelperCharDB.statWeightsName or "Imported",
+                weights = aSmoothLootHelperCharDB.statWeights,
+            },
+        }
+        aSmoothLootHelperCharDB.statWeightSource = "import"
+        aSmoothLootHelperCharDB._migratedStatProfiles = true
+    end
 end
 
 ------------------------------------------------------------------------
@@ -93,7 +126,7 @@ local function HandleSlash(msg)
             InterfaceOptionsFrame_OpenToCategory("aSmoothLootHelper")
             InterfaceOptionsFrame_OpenToCategory("aSmoothLootHelper") -- call twice (Blizzard quirk)
         elseif Settings and Settings.OpenToCategory then
-            Settings.OpenToCategory("aSmoothLootHelper")
+            Settings.OpenToCategory(SLH._settingsCategoryID)
         end
 
     elseif cmd == "on" then
@@ -105,16 +138,26 @@ local function HandleSlash(msg)
         print("|cff00ccff[SLH]|r Disabled.")
 
     elseif cmd == "mode" then
-        local valid = { off = true, pass = true, greed = true, need = true }
-        if valid[arg1] then
-            aSmoothLootHelperCharDB.autoRollMode = arg1
-            if arg1 == "off" then
-                print("|cff00ccff[SLH]|r Auto-roll mode disabled.")
-            else
-                print("|cff00ccff[SLH]|r Auto-roll mode set to " .. arg1:upper() .. " for this character (resets on logout).")
-            end
+        -- New preset modes
+        local presets = { raid = "raiding", raiding = "raiding", farm = "farming", farming = "farming",
+                          carry = "carry", boost = "carry", custom = "custom" }
+        if presets[arg1] then
+            SLH.Options:ApplyMode(presets[arg1])
+            local labels = { raiding = "Raiding (smart)", farming = "Farming / Solo", carry = "Carry / Boost", custom = "Custom" }
+            print("|cff00ccff[SLH]|r Mode set to: " .. labels[presets[arg1]])
         else
-            print("|cff00ccff[SLH]|r Usage: /slh mode off|pass|greed|need")
+            -- Legacy auto-roll override modes
+            local valid = { off = true, pass = true, greed = true, need = true }
+            if valid[arg1] then
+                aSmoothLootHelperCharDB.autoRollMode = arg1
+                if arg1 == "off" then
+                    print("|cff00ccff[SLH]|r Auto-roll mode disabled.")
+                else
+                    print("|cff00ccff[SLH]|r Auto-roll mode set to " .. arg1:upper() .. " for this character (resets on logout).")
+                end
+            else
+                print("|cff00ccff[SLH]|r Usage: /slh mode raid|farm|carry|custom  OR  /slh mode off|pass|greed|need")
+            end
         end
 
     elseif cmd == "session" then
@@ -267,6 +310,8 @@ local bootFrame = CreateFrame("Frame")
 bootFrame:RegisterEvent("PLAYER_LOGIN")
 bootFrame:SetScript("OnEvent", function()
     InitDB()
+    SLH.History:MigrateFromAccount()
     SLH.Options:BuildPanel()
-    print("|cff00ccff[SLH]|r v0.3.1 loaded. Use /slh for help.")
+    SLH.MinimapIcon:Init()
+    print("|cff00ccff[SLH]|r v1.1.0 loaded. Use /slh for help.")
 end)

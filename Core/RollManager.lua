@@ -170,6 +170,33 @@ function RollManager:EvaluateRoll(rollID, retryCount)
                 Debug("  Tier token: already carrying this token — skip")
                 -- fall through to normal rules (will likely greed or manual)
             else
+                -- Outgear guard: don't auto-need a token the player has
+                -- clearly outgeared (e.g. 496 Celestial token on a SoO-geared
+                -- character).  Mirror the same Pawn → ilvl fallback used in
+                -- the BiS section.
+                -- delta=0: greed if the equipped item in that slot is
+                -- strictly better by even 1 ilvl.  For tier tokens the
+                -- set-bonus argument only holds when ilvl is equal or
+                -- the slot is empty; if anything better is already there,
+                -- another player should get priority.
+                local pawnUpg = ItemUtil:PawnIsUpgrade(itemLink)
+                local outgeared = false
+                if pawnUpg == false then
+                    outgeared = true
+                    Debug("  Tier token: Pawn says not an upgrade — outgeared")
+                elseif pawnUpg == nil and ItemUtil:IsTokenSignificantDowngrade(itemLink, 0) then
+                    outgeared = true
+                    Debug("  Tier token: equipped slot ilvl > token ilvl — outgeared")
+                end
+
+                if outgeared then
+                    Debug("  Tier token: outgeared — GREED")
+                    RollOnLoot(rollID, ROLL_GREED)
+                    History:RecordGreed(itemID)
+                    self:Announce(itemLink, "GREED (tier token: outgeared)")
+                    return
+                end
+
                 Debug("  Tier token: for player class, not in bags — NEED")
                 RollOnLoot(rollID, ROLL_NEED)
                 self:Announce(itemLink, "NEED (tier token for your class)")
@@ -287,7 +314,12 @@ function RollManager:EvaluateRoll(rollID, retryCount)
         local bisMatched       = false
         local bisCollected     = false
         local bisBlockReason   = nil   -- set when the outgear guard fires
+        local providerEnabled  = aSmoothLootHelperCharDB and aSmoothLootHelperCharDB.bisProviderEnabled
         for pName, provider in pairs(bisProviders) do
+            -- Skip providers the player has disabled
+            if providerEnabled and providerEnabled[pName] == false then
+                Debug("  BiS check [" .. pName .. "]: DISABLED by user")
+            else
             local isBiS       = provider:IsBiS(itemID)
             local isCollected = provider:IsCollected(itemID)
             local isNormal    = provider:IsNormalVersionOfBiS(itemID)
@@ -326,6 +358,7 @@ function RollManager:EvaluateRoll(rollID, retryCount)
                     bisCollected = true
                 end
             end
+            end  -- provider enabled check
         end
         -- BiS item but already collected or outgeared → auto-greed
         if bisMatched and bisCollected then
@@ -355,27 +388,46 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     end
 
     --------------------------------------------------------------------
-    -- Session memory: repeat whatever the player rolled last session
+    -- Session memory: repeat whatever the player rolled last session.
+    -- Guard: if the previous roll was greed but the item is now an
+    -- upgrade for this character, skip and let the user decide.
     --------------------------------------------------------------------
     if GetSetting("sessionMemoryEnabled") then
         local prevRoll = sessionRolls[itemID]
         if prevRoll then
-            RollOnLoot(rollID, prevRoll)
-            if prevRoll == ROLL_GREED then History:RecordGreed(itemID) end
-            self:Announce(itemLink, ROLL_LABEL[prevRoll] .. " (session)")
-            return
+            if prevRoll == ROLL_GREED and not ItemUtil:IsEquippedBetter(itemLink) then
+                Debug("  Session memory: was GREED but item is not a downgrade — skip")
+            else
+                RollOnLoot(rollID, prevRoll)
+                if prevRoll == ROLL_GREED then History:RecordGreed(itemID) end
+                self:Announce(itemLink, ROLL_LABEL[prevRoll] .. " (session)")
+                return
+            end
         end
     end
 
     --------------------------------------------------------------------
     -- History-based auto-greed
+    -- Guard: do not auto-greed from history if the item could actually
+    -- be an upgrade (Pawn says upgrade, or equipped ilvl is worse).
     --------------------------------------------------------------------
     if GetSetting("autoGreedOnHistory") and History:HasGreeded(itemID) then
-        Debug("  History match: greeded before")
-        RollOnLoot(rollID, ROLL_GREED)
-        History:RecordGreed(itemID)
-        self:Announce(itemLink, "GREED (history)")
-        return
+        local historyBlocked = false
+        local pawnUpg = ItemUtil:PawnIsUpgrade(itemLink)
+        if pawnUpg == true then
+            historyBlocked = true
+            Debug("  History match: greeded before BUT Pawn says upgrade — skip history")
+        elseif pawnUpg == nil and not ItemUtil:IsEquippedBetter(itemLink) then
+            historyBlocked = true
+            Debug("  History match: greeded before BUT equipped is not better — skip history")
+        end
+        if not historyBlocked then
+            Debug("  History match: greeded before")
+            RollOnLoot(rollID, ROLL_GREED)
+            History:RecordGreed(itemID)
+            self:Announce(itemLink, "GREED (history)")
+            return
+        end
     end
 
     --------------------------------------------------------------------
