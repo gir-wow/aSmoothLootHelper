@@ -83,6 +83,13 @@ local ROLL_COLORS = {
     ["?"] = { r=0.50, g=0.50, b=0.50 },
 }
 
+local previewTooltip
+local function GetPreviewTooltip()
+    if previewTooltip then return previewTooltip end
+    previewTooltip = CreateFrame("GameTooltip", "SLHBisPreviewTooltip", UIParent, "GameTooltipTemplate")
+    return previewTooltip
+end
+
 ------------------------------------------------------------------------
 -- Class / spec helpers
 ------------------------------------------------------------------------
@@ -767,16 +774,20 @@ local function PopulateContent(bySlot)
                 local link = itemData.link
                 local id   = itemData.id
                 row:SetScript("OnEnter", function(self)
-                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                    local tt = GetPreviewTooltip()
+                    tt:SetOwner(self, "ANCHOR_RIGHT")
                     if link then
-                        pcall(GameTooltip.SetHyperlink, GameTooltip, link)
+                        pcall(tt.SetHyperlink, tt, link)
                     else
-                        GameTooltip:AddLine("Item #" .. id, 1, 1, 1)
-                        GameTooltip:AddLine("Loading\226\128\166", 0.7, 0.7, 0.7)
+                        tt:AddLine("Item #" .. id, 1, 1, 1)
+                        tt:AddLine("Loading\226\128\166", 0.7, 0.7, 0.7)
                     end
-                    GameTooltip:Show()
+                    tt:Show()
                 end)
-                row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+                row:SetScript("OnLeave", function()
+                    local tt = GetPreviewTooltip()
+                    tt:Hide()
+                end)
                 row:RegisterForClicks("LeftButtonUp")
                 row:SetScript("OnClick", function(_, btn)
                     if IsShiftKeyDown() and link then

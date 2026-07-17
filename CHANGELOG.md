@@ -1,5 +1,11 @@
 # aSmoothLootHelper Changelog
 
+## v1.2.1
+
+### Bug Fixes
+- BiS Preview: switched to a private tooltip frame to avoid Pawn-related GameTooltip hook errors
+- Updated startup version text to match packaged release version
+
 ## v1.2.0
 
 ### New Features
