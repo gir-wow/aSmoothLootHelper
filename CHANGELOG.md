@@ -1,5 +1,10 @@
 # aSmoothLootHelper Changelog
 
+## v1.2.2
+
+### Bug Fixes
+- Fixed ItemUtil crash in tier-token downgrade checks (`attempt to call a nil value`) by adding a safe local debug helper
+
 ## v1.2.1
 
 ### Bug Fixes

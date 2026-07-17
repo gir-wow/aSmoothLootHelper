@@ -4,6 +4,19 @@ SLH.ItemUtil = {}
 local ItemUtil = SLH.ItemUtil
 
 ------------------------------------------------------------------------
+-- Debug logging (mirrors RollManager behavior)
+------------------------------------------------------------------------
+local function Debug(msg)
+    local db = aSmoothLootHelperDB
+    if db and db.settings and db.settings.debugMode then
+        print("|cff888888[SLH debug]|r " .. tostring(msg))
+    end
+    if SLH.DebugLog then
+        SLH.DebugLog:Add(tostring(msg))
+    end
+end
+
+------------------------------------------------------------------------
 -- Extract the numeric itemID from an item link string.
 -- Item links look like: |cff...|Hitem:12345:...|h[Name]|h|r
 ------------------------------------------------------------------------
