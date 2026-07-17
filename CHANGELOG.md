@@ -1,5 +1,10 @@
 # aSmoothLootHelper Changelog
 
+## v1.2.3
+
+### Bug Fixes
+- Added a hard BiS auto-need safety gate: blocks auto-need on off-armor and wrong-primary-stat items even if armor filter is disabled
+
 ## v1.2.2
 
 ### Bug Fixes

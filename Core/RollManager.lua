@@ -328,6 +328,17 @@ function RollManager:EvaluateRoll(rollID, retryCount)
             if isBiS or isNormal then
                 bisMatched = true
                 if not isCollected then
+                    -- Hard safety gate: never auto-need clearly wrong armor/stat
+                    -- items, even when the optional armor filter is disabled.
+                    -- This protects against provider false matches and noisy data.
+                    local offType = ItemUtil:IsOffArmorType(itemLink)
+                    local wrongStat = (not offType) and ItemUtil:IsWrongPrimaryStatForPlayer(itemLink)
+                    if offType or wrongStat then
+                        bisCollected = true
+                        bisBlockReason = offType and "off-armor" or "wrong primary stat"
+                        Debug("  BiS via " .. pName .. " blocked: " .. bisBlockReason)
+                        -- Skip NEED path and fall through to BiS greed behavior.
+                    else
                     -- Outgear guard ------------------------------------------------
                     -- 1. Pawn (most accurate): if it says not an upgrade, block.
                     -- 2. Fallback ilvl check: block if every slot is >30 ilvl ahead.
@@ -353,6 +364,7 @@ function RollManager:EvaluateRoll(rollID, retryCount)
                             SLH.Notify:BiSNeed(itemLink)
                         end
                         return
+                    end
                     end
                 else
                     bisCollected = true
