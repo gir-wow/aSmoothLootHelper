@@ -1,5 +1,10 @@
 # aSmoothLootHelper Changelog
 
+## v1.3.1
+
+### Bug Fixes
+- Fixed FrogBiS dropdown only showing the base spec template, missing all phase/variant sets (e.g. P5 - BIS (Balanced), P5 - Prog (Survival))
+
 ## v1.3.0
 
 ### Bug Fixes

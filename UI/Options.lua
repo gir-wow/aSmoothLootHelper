@@ -635,10 +635,13 @@ function Options:BuildPanel()
         if FrogBiS_Templates and frogClass then
             local frogSpecsToList = {}
             if allowedSpecs then
+                -- Include base key AND all phase/variant templates (e.g. "Blood Death Knight (P5 - BIS (Balanced))")
                 for wowName in pairs(allowedSpecs) do
                     local frogKey = wowName .. " " .. frogClass
-                    if FrogBiS_Templates[frogKey] then
-                        frogSpecsToList[#frogSpecsToList + 1] = frogKey
+                    for specKey in pairs(FrogBiS_Templates) do
+                        if specKey == frogKey or specKey:sub(1, #frogKey + 2) == frogKey .. " (" then
+                            frogSpecsToList[#frogSpecsToList + 1] = specKey
+                        end
                     end
                 end
             else
