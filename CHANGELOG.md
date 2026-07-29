@@ -1,5 +1,24 @@
 # aSmoothLootHelper Changelog
 
+## v1.4.0
+
+### Bug Fixes
+- Fixed BisTooltip spec matching when using FrogBiS-style spec keys (e.g. "Blood Death Knight (P5 - BIS (Offensive))" now correctly maps to BisTooltip's "Blood tank")
+
+### Improvements
+- Renamed play modes: Farming → **Greed All**, Carry → **Pass All**; added `/slh mode greedall` and `passall` aliases
+- Name-based IsCollected fallback — catches same-named items across difficulty tiers even when ID offsets don't match
+- Expanded roll debug log: shows owned variants (by ID and name), difficulty upgrade detection
+
+### Debug Log Overhaul
+- BugSack-style WoW tab interface (CharacterFrameTabButtonTemplate) with native select/deselect styling
+- Multi-session storage: up to 10 sessions persisted across reloads (each /reload starts a new session)
+- **All Sessions** tab with `< Previous` / `Next >` navigation to browse individual sessions
+- **Current Session** and **Previous Session** quick-access tabs
+- **Loot History** tab — persistent color-coded log of all auto-rolled items with date, action, and reason
+- Date separators and mode change markers in loot history
+- Clear / Select All buttons work per-tab
+
 ## v1.3.1
 
 ### Bug Fixes

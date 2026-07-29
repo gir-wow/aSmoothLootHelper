@@ -348,10 +348,25 @@ end
 -- Checks equipped gear and bags.
 ------------------------------------------------------------------------
 function provider:IsCollected(itemID)
-    -- Check equipped
+    local dropName = GetItemInfo(itemID)
+
+    -- Check equipped (ID-based with difficulty hierarchy)
     for slot = 0, 18 do
         local eqID = GetInventoryItemID("player", slot)
-        if eqID and IsOwnedOrBetter(eqID, itemID) then return true end
+        if eqID then
+            if IsOwnedOrBetter(eqID, itemID) then
+                Debug("    [FrogBiS] IsCollected: equipped slot " .. slot .. " has id " .. eqID .. " (same or better)")
+                return true
+            end
+            -- Name-based fallback: same item name = same item, different difficulty
+            if dropName then
+                local eqName = GetItemInfo(eqID)
+                if eqName and eqName == dropName then
+                    Debug("    [FrogBiS] IsCollected: equipped slot " .. slot .. " matched by name '" .. dropName .. "' (id " .. eqID .. ")")
+                    return true
+                end
+            end
+        end
     end
 
     -- Check bags (use MoP-safe API — no C_Container in MoP Classic)
@@ -362,7 +377,19 @@ function provider:IsCollected(itemID)
             local numSlots = getNumSlots(bag) or 0
             for bagSlot = 1, numSlots do
                 local bagItemID = getItemID(bag, bagSlot)
-                if bagItemID and IsOwnedOrBetter(bagItemID, itemID) then return true end
+                if bagItemID then
+                    if IsOwnedOrBetter(bagItemID, itemID) then
+                        Debug("    [FrogBiS] IsCollected: bag " .. bag .. " slot " .. bagSlot .. " has id " .. bagItemID .. " (same or better)")
+                        return true
+                    end
+                    if dropName then
+                        local bagName = GetItemInfo(bagItemID)
+                        if bagName and bagName == dropName then
+                            Debug("    [FrogBiS] IsCollected: bag " .. bag .. " slot " .. bagSlot .. " matched by name '" .. dropName .. "' (id " .. bagItemID .. ")")
+                            return true
+                        end
+                    end
+                end
             end
         end
     end

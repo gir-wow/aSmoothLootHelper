@@ -119,7 +119,7 @@ local function CreateMinimapButton()
         GameTooltip:AddLine("aSmoothLootHelper", 0, 0.8, 1)
         local enabled = aSmoothLootHelperDB.settings.autoGreedEnabled
         GameTooltip:AddLine(enabled and "|cff00ff00Enabled|r" or "|cffff4444Disabled|r")
-        local modeLabels = { raiding = "Raiding", farming = "Farming", carry = "Carry", custom = "Custom" }
+        local modeLabels = { raiding = "Raiding", farming = "Greed All", carry = "Pass All", custom = "Custom" }
         local mode = aSmoothLootHelperCharDB.playMode or "raiding"
         GameTooltip:AddLine("Mode: " .. (modeLabels[mode] or mode), 1, 1, 1)
         GameTooltip:AddLine(" ")
@@ -175,8 +175,8 @@ local function BuildMenu()
 
     local modes = {
         { value = "raiding", label = "Raiding (smart)" },
-        { value = "farming", label = "Farming / Solo" },
-        { value = "carry",   label = "Carry / Boost" },
+        { value = "farming", label = "Greed All" },
+        { value = "carry",   label = "Pass All" },
         { value = "custom",  label = "Custom" },
     }
     for _, m in ipairs(modes) do

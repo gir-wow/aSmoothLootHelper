@@ -121,12 +121,56 @@ function RollManager:EvaluateRoll(rollID, retryCount)
 
     local qualNames = { [0]="Poor", [1]="Common", [2]="Uncommon", [3]="Rare", [4]="Epic", [5]="Legendary" }
     Debug("--- Roll on " .. itemLink .. " (id=" .. itemID .. ")")
-    Debug("  quality=" .. (qualNames[quality] or tostring(quality))
-        .. "  ilvl=" .. tostring(ilvl or "?")
-        .. "  type=" .. tostring(itemType or "?")
-        .. "  subType=" .. tostring(itemSubType or "?")
-        .. "  cached=" .. tostring(name ~= nil)
-        .. "  retry=" .. retryCount)
+    -- Detect difficulty tier from ID offsets
+    local diffTier = "unknown"
+    if name then
+        local isDiffUpgrade = ItemUtil:IsDifficultyUpgrade(itemID)
+        -- Check if any lower-difficulty variant exists to determine tier
+        local hasCelestial = ItemUtil:IsInBagsOrEquipped(itemID) -- exact match
+        local ownedVariant = nil
+        for _, offset in ipairs({137, 543, 747, 680, 884}) do
+            if ItemUtil:IsInBagsOrEquipped(itemID - offset) then
+                ownedVariant = "lower (id " .. (itemID - offset) .. ")"
+            end
+            if ItemUtil:IsInBagsOrEquipped(itemID + offset) then
+                ownedVariant = ownedVariant or ""
+                ownedVariant = "higher (id " .. (itemID + offset) .. ")"
+            end
+        end
+        -- Also check by name across equipped
+        local ownedByName = nil
+        for slot = 0, 18 do
+            local eqID = GetInventoryItemID("player", slot)
+            if eqID and eqID ~= itemID and name then
+                local eqName = GetItemInfo(eqID)
+                if eqName and eqName == name then
+                    ownedByName = "slot " .. slot .. " id=" .. eqID
+                end
+            end
+        end
+        Debug("  quality=" .. (qualNames[quality] or tostring(quality))
+            .. "  ilvl=" .. tostring(ilvl or "?")
+            .. "  type=" .. tostring(itemType or "?")
+            .. "  subType=" .. tostring(itemSubType or "?")
+            .. "  cached=" .. tostring(name ~= nil)
+            .. "  retry=" .. retryCount)
+        if ownedVariant then
+            Debug("  ownedVariant=" .. ownedVariant)
+        end
+        if ownedByName then
+            Debug("  ownedByName=" .. ownedByName)
+        end
+        if isDiffUpgrade then
+            Debug("  diffUpgrade=YES (lower difficulty version in bags/equipped)")
+        end
+    else
+        Debug("  quality=" .. (qualNames[quality] or tostring(quality))
+            .. "  ilvl=" .. tostring(ilvl or "?")
+            .. "  type=" .. tostring(itemType or "?")
+            .. "  subType=" .. tostring(itemSubType or "?")
+            .. "  cached=false"
+            .. "  retry=" .. retryCount)
+    end
 
     -- If GetItemInfo hasn't cached yet (name==nil), retry up to 3 times
     -- so armor-type filter, ilvl threshold, etc. can work.
@@ -529,6 +573,64 @@ end
 ------------------------------------------------------------------------
 function RollManager:Announce(itemLink, reason)
     print("|cff00ccff[SLH]|r Auto-rolled " .. reason .. " on " .. (itemLink or "?"))
+    -- Record to persistent loot history
+    self:RecordLootHistory(itemLink, reason)
+end
+
+------------------------------------------------------------------------
+-- Persistent loot history: date - item - action - reason
+------------------------------------------------------------------------
+local MAX_LOOT_HISTORY = 200
+
+function RollManager:RecordLootHistory(itemLink, reason)
+    if not aSmoothLootHelperDB then return end
+    aSmoothLootHelperDB.lootHistory = aSmoothLootHelperDB.lootHistory or {}
+    local history = aSmoothLootHelperDB.lootHistory
+
+    -- Insert date breaker if day changed
+    local today = date("%Y-%m-%d")
+    local lastDate = aSmoothLootHelperDB.lootHistoryLastDate
+    if lastDate ~= today then
+        history[#history + 1] = {
+            time = today,
+            action = "SEPARATOR",
+            item = "--- " .. date("%A, %B %d") .. " ---",
+        }
+        aSmoothLootHelperDB.lootHistoryLastDate = today
+    end
+
+    -- Parse action from reason string (e.g. "GREED (off-armor)" → "GREED")
+    local action = reason:match("^(%u+)") or "?"
+    local detail = reason:match("^%u+%s*(.*)$") or ""
+
+    local itemName = itemLink and itemLink:match("%[(.-)%]") or "?"
+    local entry = {
+        time = date("%Y-%m-%d %H:%M"),
+        item = itemName,
+        link = itemLink,
+        action = action,
+        reason = detail,
+    }
+    history[#history + 1] = entry
+    if #history > MAX_LOOT_HISTORY then
+        table.remove(history, 1)
+    end
+
+    -- Notify debug log UI to refresh if showing history tab
+    if SLH.DebugLog and SLH.DebugLog.frame and SLH.DebugLog.frame:IsShown() then
+        SLH.DebugLog:RefreshText()
+    end
+end
+
+function RollManager:GetLootHistory()
+    if not aSmoothLootHelperDB then return {} end
+    return aSmoothLootHelperDB.lootHistory or {}
+end
+
+function RollManager:ClearLootHistory()
+    if aSmoothLootHelperDB then
+        aSmoothLootHelperDB.lootHistory = {}
+    end
 end
 
 ------------------------------------------------------------------------

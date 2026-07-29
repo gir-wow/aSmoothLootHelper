@@ -72,11 +72,25 @@ local MODE_PRESETS = {
 ------------------------------------------------------------------------
 function Options:ApplyMode(modeName)
     local charDB = aSmoothLootHelperCharDB
+    local prevMode = charDB.playMode
     charDB.playMode = modeName
     local preset = MODE_PRESETS[modeName]
     if preset then
         for key, value in pairs(preset) do
             charDB[key] = value
+        end
+    end
+    -- Record mode change in loot history
+    if prevMode ~= modeName and SLH.RollManager then
+        local labels = { raiding = "Raiding", farming = "Greed All", carry = "Pass All", custom = "Custom" }
+        local db = aSmoothLootHelperDB
+        if db then
+            db.lootHistory = db.lootHistory or {}
+            db.lootHistory[#db.lootHistory + 1] = {
+                time = date("%Y-%m-%d %H:%M"),
+                action = "MODE",
+                item = "Mode changed: " .. (labels[modeName] or modeName),
+            }
         end
     end
     -- Refresh widgets if panel is visible
@@ -284,8 +298,8 @@ function Options:BuildPanel()
 
     local modeChoices = {
         { value = "raiding", label = "Raiding (smart)" },
-        { value = "farming", label = "Farming / Solo" },
-        { value = "carry",   label = "Carry / Boost" },
+        { value = "farming", label = "Greed All" },
+        { value = "carry",   label = "Pass All" },
         { value = "custom",  label = "Custom" },
     }
 
@@ -338,9 +352,9 @@ function Options:BuildPanel()
 
     CreateInfoText(y, "Raiding — armor filter on, BiS need, downgrade greed, tier tokens")
     y = y - 16
-    CreateInfoText(y, "Farming — greed everything, skip trash quality checks")
+    CreateInfoText(y, "Greed All — greed everything, no exceptions")
     y = y - 16
-    CreateInfoText(y, "Carry — pass everything to your group")
+    CreateInfoText(y, "Pass All — pass everything to your group")
     y = y - 16
     CreateInfoText(y, "Custom — use the advanced settings below as-is")
     y = y - 28

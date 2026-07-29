@@ -2,7 +2,7 @@
 
 **Automatically roll on loot based on rules, history, BiS lists, and stat weights.**
 
-A World of Warcraft **MoP Classic** addon that reduces loot roll clicking to near-zero. Configure your rules once and the addon handles Need, Greed, and Pass decisions for you — intelligently.
+A World of Warcraft addon for **Classic Era**, **TBC Classic**, **Cataclysm Classic**, and **MoP Classic** that reduces loot roll clicking to near-zero. Configure your rules once and the addon handles Need, Greed, and Pass decisions for you — intelligently.
 
 ## Features
 
@@ -12,8 +12,8 @@ Quick-switch between profiles via minimap icon or `/slh mode`:
 | Mode | Behavior |
 |---|---|
 | **Raiding** | BiS auto-need, tier tokens, armor filter, downgrade greed — leave upgrades for manual decision |
-| **Farming** | Auto-greed everything, quality threshold on, no filters |
-| **Carry / Boost** | Auto-pass everything |
+| **Greed All** | Greed everything, no exceptions — all filters and BiS checks disabled |
+| **Pass All** | Pass everything — for carrying/boosting someone |
 | **Custom** | Configure each setting individually |
 
 ### BiS Auto-Need
@@ -81,7 +81,7 @@ Built-in log viewer (`/slh debuglog`) with selectable, copyable text. Shows exac
 |---|---|
 | `/slh` | Open options panel |
 | `/slh on` / `off` | Enable / disable addon |
-| `/slh mode <raiding\|farming\|carry\|custom>` | Switch play mode preset |
+| `/slh mode <raiding\|greedall\|passall\|custom>` | Switch play mode preset |
 | `/slh mode <off\|pass\|greed\|need>` | Legacy auto-roll override (resets on logout) |
 | `/slh bis` | Open BiS Preview window |
 | `/slh session` | Toggle session memory |

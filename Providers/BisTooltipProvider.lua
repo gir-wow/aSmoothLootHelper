@@ -60,6 +60,41 @@ local BT_SPEC_MAP = {
 }
 
 ------------------------------------------------------------------------
+-- Reverse map: BisTooltip class name → FrogBiS class suffix
+------------------------------------------------------------------------
+local CLASS_NAME_TO_FROG = {}
+for token, name in pairs(CLASS_TOKEN_TO_NAME) do
+    CLASS_NAME_TO_FROG[name] = name
+end
+
+------------------------------------------------------------------------
+-- Extract BisTooltip-compatible spec name from various key formats:
+--   "Blood tank / P5"                              → "Blood tank"
+--   "Blood Death Knight (P5 - BIS (Offensive))"    → "Blood tank"
+--   "Blood Death Knight"                           → "Blood tank"
+--   "Blood"                                        → "Blood tank"
+-- Falls back to input if nothing matches.
+------------------------------------------------------------------------
+local function ToBisTooltipSpec(setting)
+    if not setting or setting == "" then return nil end
+    -- "spec / phase" format → extract spec part
+    local specPart = setting:match("^(.-)%s*/%s*.+$") or setting
+    -- Strip FrogBiS class suffix + variant: "Blood Death Knight (P5 ...)" → "Blood"
+    for _, className in pairs(CLASS_TOKEN_TO_NAME) do
+        local baseSpec = specPart:match("^(.-)%s+" .. className:gsub("(%W)", "%%%1"))
+        if baseSpec then
+            specPart = baseSpec
+            break
+        end
+    end
+    -- Strip any remaining parenthetical (e.g. "(P5 - BIS (Offensive))")
+    specPart = specPart:gsub("%s*%(.*$", "")
+    specPart = specPart:gsub("^%s+", ""):gsub("%s+$", "")
+    -- Map WoW API name → BisTooltip name
+    return BT_SPEC_MAP[specPart] or specPart
+end
+
+------------------------------------------------------------------------
 -- Return the player's BisTooltip-style class name.
 ------------------------------------------------------------------------
 local function GetPlayerClassName()
@@ -204,9 +239,12 @@ function provider:IsBiS(itemID)
                 end
                 return false
             end
+            -- Map FrogBiS-style keys to BT spec name
+            local btSpec = ToBisTooltipSpec(setting)
+            local specToCheck = btSpec or setting
             -- Plain spec name (no phase) — check all phases
-            if IsInBislist(itemID, className, setting, nil) then
-                Debug("    [BisTooltip] MATCH in bislists: " .. className .. "/" .. setting .. " (all phases)")
+            if IsInBislist(itemID, className, specToCheck, nil) then
+                Debug("    [BisTooltip] MATCH in bislists: " .. className .. "/" .. specToCheck .. " (all phases)")
                 return true
             end
             return false
@@ -297,16 +335,27 @@ function provider:IsBiS(itemID)
     -- If the user explicitly set a spec with a phase suffix (e.g. "Blood tank - PR"),
     -- we match that exactly. If using auto-detect (WoW API name like "Blood"),
     -- we match any BisTooltip spec that starts with the mapped base name.
+    -- Also map FrogBiS-style keys to BisTooltip spec names.
     local acceptedSpecs = {}
     local acceptedBaseSpecs = {}  -- for prefix matching
     if mainSpec then
         acceptedSpecs[mainSpec] = true
         acceptedBaseSpecs[mainSpec] = true
+        local btSpec = ToBisTooltipSpec(mainSpec)
+        if btSpec then
+            acceptedSpecs[btSpec] = true
+            acceptedBaseSpecs[btSpec] = true
+        end
     end
     if checkOffspec then
         if offSpec and offSpec ~= "" then
             acceptedSpecs[offSpec] = true
             acceptedBaseSpecs[offSpec] = true
+            local btOff = ToBisTooltipSpec(offSpec)
+            if btOff then
+                acceptedSpecs[btOff] = true
+                acceptedBaseSpecs[btOff] = true
+            end
         else
             acceptedSpecs = nil
             acceptedBaseSpecs = nil

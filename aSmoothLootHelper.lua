@@ -140,10 +140,11 @@ local function HandleSlash(msg)
     elseif cmd == "mode" then
         -- New preset modes
         local presets = { raid = "raiding", raiding = "raiding", farm = "farming", farming = "farming",
-                          carry = "carry", boost = "carry", custom = "custom" }
+                          carry = "carry", boost = "carry", custom = "custom",
+                          greedall = "farming", passall = "carry" }
         if presets[arg1] then
             SLH.Options:ApplyMode(presets[arg1])
-            local labels = { raiding = "Raiding (smart)", farming = "Farming / Solo", carry = "Carry / Boost", custom = "Custom" }
+            local labels = { raiding = "Raiding (smart)", farming = "Greed All", carry = "Pass All", custom = "Custom" }
             print("|cff00ccff[SLH]|r Mode set to: " .. labels[presets[arg1]])
         else
             -- Legacy auto-roll override modes
@@ -156,7 +157,7 @@ local function HandleSlash(msg)
                     print("|cff00ccff[SLH]|r Auto-roll mode set to " .. arg1:upper() .. " for this character (resets on logout).")
                 end
             else
-                print("|cff00ccff[SLH]|r Usage: /slh mode raid|farm|carry|custom  OR  /slh mode off|pass|greed|need")
+                print("|cff00ccff[SLH]|r Usage: /slh mode raid|farm|carry|greedall|passall|custom  OR  /slh mode off|pass|greed|need")
             end
         end
 
@@ -314,9 +315,10 @@ local bootFrame = CreateFrame("Frame")
 bootFrame:RegisterEvent("PLAYER_LOGIN")
 bootFrame:SetScript("OnEvent", function()
     InitDB()
+    SLH.DebugLog:InitStorage()
     SLH.History:MigrateFromAccount()
     SLH.Options:BuildPanel()
     SLH.BisPreview:Init()
     SLH.MinimapIcon:Init()
-    print("|cff00ccff[SLH]|r v1.2.3 loaded. Use /slh for help.")
+    print("|cff00ccff[SLH]|r v1.3.2 loaded. Use /slh for help.")
 end)
