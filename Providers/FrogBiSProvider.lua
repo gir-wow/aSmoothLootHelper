@@ -152,6 +152,22 @@ local function IsMatchingID(itemID, targetID)
 end
 
 ------------------------------------------------------------------------
+-- Check if ownedID is the same item as targetID but at the same or
+-- HIGHER difficulty.  Used by IsCollected so that owning normal does
+-- NOT count as "collected" when the heroic version drops.
+--   Heroic > Normal > Celestial/LFR  (regardless of upgrade level)
+--   Celestial→Normal: +137  Normal→Heroic: +543  Celestial→Heroic: +680
+------------------------------------------------------------------------
+local function IsOwnedOrBetter(ownedID, droppingID)
+    if ownedID == droppingID then return true end
+    -- Only positive offsets = owned is higher difficulty than dropping
+    for _, offset in ipairs(DIFFICULTY_OFFSETS) do
+        if offset > 0 and ownedID == droppingID + offset then return true end
+    end
+    return false
+end
+
+------------------------------------------------------------------------
 -- Name-based item matching cache.  Built lazily from the BiS lists.
 -- Maps normalised item name → true for all items in any active list.
 ------------------------------------------------------------------------
@@ -335,7 +351,7 @@ function provider:IsCollected(itemID)
     -- Check equipped
     for slot = 0, 18 do
         local eqID = GetInventoryItemID("player", slot)
-        if eqID and IsMatchingID(eqID, itemID) then return true end
+        if eqID and IsOwnedOrBetter(eqID, itemID) then return true end
     end
 
     -- Check bags (use MoP-safe API — no C_Container in MoP Classic)
@@ -346,7 +362,7 @@ function provider:IsCollected(itemID)
             local numSlots = getNumSlots(bag) or 0
             for bagSlot = 1, numSlots do
                 local bagItemID = getItemID(bag, bagSlot)
-                if bagItemID and IsMatchingID(bagItemID, itemID) then return true end
+                if bagItemID and IsOwnedOrBetter(bagItemID, itemID) then return true end
             end
         end
     end

@@ -1,5 +1,16 @@
 # aSmoothLootHelper Changelog
 
+## v1.3.0
+
+### Bug Fixes
+- Fixed BiS auto-need firing before checking all providers — if ANY provider says the item is already collected, it now correctly greeds instead of needing
+- Fixed IsCollected treating lower-difficulty versions as "collected" — owning Normal no longer blocks needing on Heroic
+
+### Improvements
+- IsCollected now respects difficulty hierarchy: Heroic > Normal > Celestial/LFR (upgrade level irrelevant)
+- Difficulty upgrades (e.g. have Normal, HC drops) bypass Pawn and outgear guards entirely — higher tier always wins
+- Armor type and wrong-stat safety gates still apply regardless
+
 ## v1.2.3
 
 ### Bug Fixes

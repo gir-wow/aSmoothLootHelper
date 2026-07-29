@@ -1,13 +1,27 @@
-# deploy.ps1 — Copy aSmoothLootHelper addon files into the WoW MoP Classic AddOns folder.
+# deploy.ps1 — Copy aSmoothLootHelper addon files into a selected WoW client AddOns folder.
 # Run from anywhere. Requires Administrator if WoW is in Program Files.
 #
 # Usage:  .\scripts\deploy.ps1
 #         .\scripts\deploy.ps1 -Destination "D:\Games\WoW\_classic_\Interface\AddOns\aSmoothLootHelper"
+#         .\scripts\deploy.ps1 -ClientFlavor classic_era
 
 param(
     [string]$Source      = "C:\git\aSmoothLootHelper",
-    [string]$Destination = "C:\Program Files (x86)\World of Warcraft\_classic_\Interface\AddOns\aSmoothLootHelper"
+    [string]$Destination = "",
+    [ValidateSet("classic", "anniversary", "classic_era")]
+    [string]$ClientFlavor = "classic"
 )
+
+if (-not $Destination -or $Destination.Trim() -eq "") {
+    $base = "C:\Program Files (x86)\World of Warcraft"
+    switch ($ClientFlavor) {
+        "classic"      { $branch = "_classic_" }
+        "anniversary"  { $branch = "_anniversary_" }
+        "classic_era"  { $branch = "_classic_era_" }
+        default          { $branch = "_classic_" }
+    }
+    $Destination = Join-Path $base "$branch\Interface\AddOns\aSmoothLootHelper"
+}
 
 # Only these directories / files belong in the addon
 $addonDirs  = @("Core", "Providers", "UI")

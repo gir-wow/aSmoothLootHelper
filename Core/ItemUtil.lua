@@ -472,6 +472,25 @@ function ItemUtil:IsInBagsOrEquipped(itemID)
 end
 
 ------------------------------------------------------------------------
+-- Difficulty upgrade detection: is the dropping itemID a higher
+-- difficulty version of something currently equipped or in bags?
+-- Heroic > Normal > Celestial/LFR (upgrade level irrelevant)
+------------------------------------------------------------------------
+local DIFF_OFFSETS = { 137, 543, 747, 543 + 137, 747 + 137 }
+
+function ItemUtil:IsDifficultyUpgrade(droppingID)
+    if not droppingID then return false end
+    -- Check if we own a LOWER difficulty version of this item
+    for _, offset in ipairs(DIFF_OFFSETS) do
+        local lowerID = droppingID - offset
+        if lowerID > 0 and self:IsInBagsOrEquipped(lowerID) then
+            return true
+        end
+    end
+    return false
+end
+
+------------------------------------------------------------------------
 -- Tier token detection
 --
 -- In MoP, tier tokens are Miscellaneous/Junk items whose name ends with

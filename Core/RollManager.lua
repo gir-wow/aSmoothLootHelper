@@ -225,14 +225,18 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     if GetSetting("transmogNeedEnabled") then
         local canSource = false
         if C_Transmog and C_Transmog.CanTransmogItem then
-            local _, _, canBeSource = C_Transmog.CanTransmogItem(itemLink)
-            canSource = canBeSource == true
+            local ok, _, _, canBeSource = pcall(C_Transmog.CanTransmogItem, itemLink)
+            canSource = ok and canBeSource == true
         end
         Debug("  Transmog check: canSource=" .. tostring(canSource))
         if canSource then
-            local hasTransmog = C_TransmogCollection
-                                and C_TransmogCollection.PlayerHasTransmog
-                                and C_TransmogCollection.PlayerHasTransmog(itemID)
+            local hasTransmog = nil
+            if C_TransmogCollection and C_TransmogCollection.PlayerHasTransmog then
+                local ok, value = pcall(C_TransmogCollection.PlayerHasTransmog, itemID)
+                if ok then
+                    hasTransmog = value
+                end
+            end
             Debug("  Transmog check: hasTransmog=" .. tostring(hasTransmog))
             if not hasTransmog then
                 RollOnLoot(rollID, ROLL_NEED)
@@ -314,7 +318,10 @@ function RollManager:EvaluateRoll(rollID, retryCount)
         local bisMatched       = false
         local bisCollected     = false
         local bisBlockReason   = nil   -- set when the outgear guard fires
+        local bisNeedProvider  = nil   -- provider that would trigger Need
         local providerEnabled  = aSmoothLootHelperCharDB and aSmoothLootHelperCharDB.bisProviderEnabled
+
+        -- Pass 1: gather BiS verdicts from all providers
         for pName, provider in pairs(bisProviders) do
             -- Skip providers the player has disabled
             if providerEnabled and providerEnabled[pName] == false then
@@ -327,51 +334,64 @@ function RollManager:EvaluateRoll(rollID, retryCount)
 
             if isBiS or isNormal then
                 bisMatched = true
-                if not isCollected then
-                    -- Hard safety gate: never auto-need clearly wrong armor/stat
-                    -- items, even when the optional armor filter is disabled.
-                    -- This protects against provider false matches and noisy data.
-                    local offType = ItemUtil:IsOffArmorType(itemLink)
-                    local wrongStat = (not offType) and ItemUtil:IsWrongPrimaryStatForPlayer(itemLink)
-                    if offType or wrongStat then
-                        bisCollected = true
-                        bisBlockReason = offType and "off-armor" or "wrong primary stat"
-                        Debug("  BiS via " .. pName .. " blocked: " .. bisBlockReason)
-                        -- Skip NEED path and fall through to BiS greed behavior.
-                    else
-                    -- Outgear guard ------------------------------------------------
-                    -- 1. Pawn (most accurate): if it says not an upgrade, block.
-                    -- 2. Fallback ilvl check: block if every slot is >30 ilvl ahead.
-                    local pawnUpg = ItemUtil:PawnIsUpgrade(itemLink)
-                    local blocked = false
-                    if pawnUpg == false then
-                        blocked = true
-                        bisBlockReason = "not an upgrade (Pawn)"
-                        Debug("  BiS via " .. pName .. " blocked: Pawn says not an upgrade")
-                    elseif pawnUpg == nil and ItemUtil:IsSignificantDowngrade(itemLink) then
-                        blocked = true
-                        bisBlockReason = "outgeared (ilvl >" .. (ilvl or "?") .. ")"
-                        Debug("  BiS via " .. pName .. " blocked: equipped ilvl significantly higher than " .. tostring(ilvl))
-                    end
-                    -- -------------------------------------------------------------
-
-                    if blocked then
-                        bisCollected = true   -- fall through to greed path below
-                    else
-                        RollOnLoot(rollID, ROLL_NEED)
-                        self:Announce(itemLink, "NEED (BiS via " .. pName .. ")")
-                        if GetSetting("bisNotifyEnabled") ~= false and SLH.Notify then
-                            SLH.Notify:BiSNeed(itemLink)
-                        end
-                        return
-                    end
-                    end
-                else
+                if isCollected then
                     bisCollected = true
+                elseif not bisNeedProvider then
+                    bisNeedProvider = pName
                 end
+            end
+            -- Also mark collected if ANY provider says we own it (cross-check)
+            if isCollected then
+                bisCollected = true
             end
             end  -- provider enabled check
         end
+
+        -- Pass 2: if BiS matched and not already collected, attempt Need
+        if bisMatched and not bisCollected and bisNeedProvider then
+            -- Hard safety gate: never auto-need clearly wrong armor/stat
+            local offType = ItemUtil:IsOffArmorType(itemLink)
+            local wrongStat = (not offType) and ItemUtil:IsWrongPrimaryStatForPlayer(itemLink)
+            if offType or wrongStat then
+                bisCollected = true
+                bisBlockReason = offType and "off-armor" or "wrong primary stat"
+                Debug("  BiS via " .. bisNeedProvider .. " blocked: " .. bisBlockReason)
+            else
+                -- Difficulty upgrade (e.g. have Normal, HC drops) bypasses
+                -- Pawn/outgear guards — higher tier always wins.
+                local isDiffUpgrade = ItemUtil:IsDifficultyUpgrade(itemID)
+                if isDiffUpgrade then
+                    Debug("  BiS via " .. bisNeedProvider .. ": difficulty upgrade detected, skipping Pawn/outgear guard")
+                end
+
+                -- Outgear guard (skipped for difficulty upgrades) --------
+                local blocked = false
+                if not isDiffUpgrade then
+                    local pawnUpg = ItemUtil:PawnIsUpgrade(itemLink)
+                    if pawnUpg == false then
+                        blocked = true
+                        bisBlockReason = "not an upgrade (Pawn)"
+                        Debug("  BiS via " .. bisNeedProvider .. " blocked: Pawn says not an upgrade")
+                    elseif pawnUpg == nil and ItemUtil:IsSignificantDowngrade(itemLink) then
+                        blocked = true
+                        bisBlockReason = "outgeared (ilvl >" .. (ilvl or "?") .. ")"
+                        Debug("  BiS via " .. bisNeedProvider .. " blocked: equipped ilvl significantly higher than " .. tostring(ilvl))
+                    end
+                end
+
+                if blocked then
+                    bisCollected = true
+                else
+                    RollOnLoot(rollID, ROLL_NEED)
+                    self:Announce(itemLink, "NEED (BiS via " .. bisNeedProvider .. ")")
+                    if GetSetting("bisNotifyEnabled") ~= false and SLH.Notify then
+                        SLH.Notify:BiSNeed(itemLink)
+                    end
+                    return
+                end
+            end
+        end
+
         -- BiS item but already collected or outgeared → auto-greed
         if bisMatched and bisCollected then
             local reason = bisBlockReason or "already collected"

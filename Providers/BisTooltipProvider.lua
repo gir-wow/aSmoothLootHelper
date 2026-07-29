@@ -364,11 +364,14 @@ end
 function provider:IsCollected(itemID)
     if not Bistooltip_char_equipment then return false end
     if Bistooltip_char_equipment[itemID] then return true end
-    -- Check warforged variants
-    return (Bistooltip_char_equipment[itemID + HWF_OFFSET] ~= nil)
-        or (Bistooltip_char_equipment[itemID - HWF_OFFSET] ~= nil)
-        or (Bistooltip_char_equipment[itemID + NWF_OFFSET] ~= nil)
-        or (Bistooltip_char_equipment[itemID - NWF_OFFSET] ~= nil)
+    -- Only count as collected if we own a HIGHER difficulty version.
+    -- Heroic > Normal > Celestial/LFR (regardless of upgrade level)
+    for _, offset in ipairs(DIFFICULTY_OFFSETS) do
+        if offset > 0 and Bistooltip_char_equipment[itemID + offset] then
+            return true
+        end
+    end
+    return false
 end
 
 ------------------------------------------------------------------------

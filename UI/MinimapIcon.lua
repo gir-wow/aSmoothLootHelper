@@ -6,6 +6,26 @@ SLH.MinimapIcon = {}
 ------------------------------------------------------------------------
 local MIN_RADIUS = 80
 
+local ICON_TEXTURES = {
+    "Interface\\Icons\\INV_Misc_Dice_02",
+    "Interface\\Icons\\INV_Misc_Dice_01",
+    "Interface\\Icons\\INV_Misc_QuestionMark",
+}
+
+local function SetBestIconTexture(tex)
+    if not tex then return end
+    -- Prefer the normal dice icon, but keep robust fallbacks for client asset diffs.
+    tex:SetTexture(ICON_TEXTURES[1])
+    if not tex:GetTexture() then
+        for i = 2, #ICON_TEXTURES do
+            tex:SetTexture(ICON_TEXTURES[i])
+            if tex:GetTexture() then
+                break
+            end
+        end
+    end
+end
+
 local function AngleToPosition(angle)
     local rad = math.rad(angle)
     return MIN_RADIUS * math.cos(rad), -MIN_RADIUS * math.sin(rad)
@@ -25,13 +45,17 @@ local function CreateMinimapButton()
     local icon = btn:CreateTexture(nil, "BACKGROUND")
     icon:SetSize(20, 20)
     icon:SetPoint("CENTER")
-    icon:SetTexture("Interface\\Icons\\INV_Misc_Dice_02")
+    SetBestIconTexture(icon)
 
     -- Circular mask overlay to hide the square corners
-    local mask = btn:CreateMaskTexture()
-    mask:SetAllPoints(icon)
-    mask:SetTexture("Interface\\CHARACTERFRAME\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-    icon:AddMaskTexture(mask)
+    if btn.CreateMaskTexture and icon.AddMaskTexture then
+        local mask = btn:CreateMaskTexture()
+        if mask then
+            mask:SetAllPoints(icon)
+            mask:SetTexture("Interface\\CHARACTERFRAME\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+            icon:AddMaskTexture(mask)
+        end
+    end
 
     -- Highlight ring (standard Blizzard minimap button look)
     btn:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
