@@ -1,5 +1,41 @@
 # aSmoothLootHelper Changelog
 
+## v1.5.0
+
+### New Features
+- Added Boss Loot Overlay: draggable in-game wanted-drop frame for current boss
+- Added `/slh bossloot` toggle command
+- Added `/slh bossloot test <boss> [normal|heroic|celestial|combined]` preview command
+- Added `/slh bossloot clear` to exit preview mode
+- Boss Loot Overlay combines LootReserve favorites and active BiS tracker items
+- Boss Loot Overlay supports LootReserve and AtlasLootClassic MoP dungeon/raid loot data
+- Boss Loot Overlay supports Normal, Heroic, Celestial, Combined, and Auto difficulty modes
+- Added Boss Loot Overlay settings for enable/disable, difficulty mode, and background opacity
+- Boss Loot Overlay rows are hoverable and show item tooltips
+- Added LootReserve personal-reserve auto-roll support
+- Added configurable LootReserve Main Spec and Off Spec reserve actions
+- Added heirloom priority option to auto-greed matching-slot drops while a valid heirloom is equipped
+
+### Bug Fixes
+- Fixed FrogBiS saved sets not appearing in dropdown due to empty-items filter
+- Fixed Pawn scale dropdown showing wrong or no scales by using `PawnGetAllScalesEx`
+- Fixed startup loaded message version so it matches the packaged release
+- Fixed AtlasLoot token reward matching when LootReserve data is not loaded
+- Removed broad BisTooltip same-name fallback to avoid cross-difficulty/duplicate-name false positives outside known variant matching
+
+### Improvements
+- Delayed native loot roll submission slightly to avoid MoP roll-frame initialization misses
+- Added AtlasLootClassic token-list expansion so tier-token bosses can match wanted tier rewards
+- Added token reward matching through both LootReserve and AtlasLootClassic
+- Deduplicated Boss Loot Overlay rows when the same item is found from multiple sources
+- Merged duplicate item source labels, e.g. `Favorite, BiS`
+- Refreshes Boss Loot Overlay when target, encounter, item cache, or instance difficulty changes
+- Added support for FrogBiS active saved set item IDs in boss loot matching
+- BiS Preview now exposes active configured item IDs for reuse by the boss loot overlay
+- Debug Log loot history now keeps clickable item links with hover tooltips
+- Pawn scale dropdown now prefers visible character scales from `PawnGetAllScalesEx`
+- FrogBiS dropdown includes lazy-loaded/empty saved sets and scans class-matching saved sets
+
 ## v1.4.0
 
 ### Bug Fixes

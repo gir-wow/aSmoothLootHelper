@@ -245,6 +245,38 @@ function ItemUtil:GetEquipSlots(itemLink)
 end
 
 ------------------------------------------------------------------------
+-- Returns true when every slot the item could fill is occupied by an
+-- heirloom that is still active at the player's current level.
+------------------------------------------------------------------------
+function ItemUtil:HasValidEquippedHeirloom(itemLink)
+    if not C_Heirloom or not C_Heirloom.IsItemHeirloom
+       or not C_Heirloom.GetHeirloomInfo then
+        return false
+    end
+
+    local slots = self:GetEquipSlots(itemLink)
+    if not slots then return false end
+
+    local playerLevel = UnitLevel("player")
+    if not playerLevel then return false end
+
+    for _, slotID in ipairs(slots) do
+        local equippedLink = GetInventoryItemLink("player", slotID)
+        local equippedID = self:GetItemID(equippedLink)
+        if not equippedID or not C_Heirloom.IsItemHeirloom(equippedID) then
+            return false
+        end
+
+        local _, _, _, _, _, minLevel, maxLevel = C_Heirloom.GetHeirloomInfo(equippedID)
+        if not maxLevel or playerLevel < (minLevel or 1) or playerLevel > maxLevel then
+            return false
+        end
+    end
+
+    return true
+end
+
+------------------------------------------------------------------------
 -- Compare the item's ilvl to what the player has equipped in the
 -- same slot(s). Returns true if ALL matching equipped slots have
 -- a higher ilvl than the drop (i.e. the drop is a downgrade).

@@ -2,10 +2,11 @@
 ## Title: aSmoothLootHelper
 ## Notes: Automatically rolls greed on previously greeded items and items below an iLvl threshold.
 ## Author: Aldur
-## Version: 1.4.0
+## Category: Aldur Addons
+## Version: 1.5.0
 ## SavedVariables: aSmoothLootHelperDB
 ## SavedVariablesPerCharacter: aSmoothLootHelperCharDB
-## OptionalDeps: Bistooltip, FrogBiS, Pawn, AtlasLootClassic
+## OptionalDeps: Bistooltip, FrogBiS, Pawn, AtlasLootClassic, LootReserve
 
 Core\ItemUtil.lua
 Core\History.lua
@@ -14,9 +15,11 @@ Core\RollManager.lua
 Providers\BisTooltipProvider.lua
 Providers\FrogBiSProvider.lua
 Providers\AtlasLootProvider.lua
+Providers\LootReserveProvider.lua
 UI\DebugLog.lua
 UI\Notify.lua
 UI\BisPreview.lua
+UI\BossLootOverlay.lua
 UI\MinimapIcon.lua
 UI\Options.lua
 aSmoothLootHelper.lua

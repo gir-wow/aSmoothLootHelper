@@ -925,19 +925,7 @@ end
 function BisPreview:Refresh()
     if not frame then return end
 
-    local charDB     = aSmoothLootHelperCharDB
-    local provEnabled = charDB and charDB.bisProviderEnabled
-    local collected   = {}
-
-    if not provEnabled or provEnabled["BisTooltip"] ~= false then
-        GatherFromBisTooltip(collected)
-    end
-    if not provEnabled or provEnabled["FrogBiS"] ~= false then
-        GatherFromFrogBiS(collected)
-    end
-    if not provEnabled or provEnabled["AtlasLoot"] ~= false then
-        GatherFromAtlasLoot(collected)
-    end
+    local collected = self:GetActiveItemIDs()
 
     -- Populate immediately with whatever is cached
     local function DoPopulate()
@@ -998,6 +986,24 @@ function BisPreview:Refresh()
             DoPopulate()
         end
     end)
+end
+
+function BisPreview:GetActiveItemIDs()
+    local charDB      = aSmoothLootHelperCharDB
+    local provEnabled = charDB and charDB.bisProviderEnabled
+    local collected   = {}
+
+    if not provEnabled or provEnabled["BisTooltip"] ~= false then
+        GatherFromBisTooltip(collected)
+    end
+    if not provEnabled or provEnabled["FrogBiS"] ~= false then
+        GatherFromFrogBiS(collected)
+    end
+    if not provEnabled or provEnabled["AtlasLoot"] ~= false then
+        GatherFromAtlasLoot(collected)
+    end
+
+    return collected
 end
 
 function BisPreview:Toggle()

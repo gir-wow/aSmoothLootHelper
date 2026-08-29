@@ -29,6 +29,7 @@ local CHAR_DEFAULTS = {
     armorFilterEnabled = true,
     armorFilterAction  = "pass",   -- "greed" / "pass"
     downgradeGreedEnabled = true,
+    heirloomPriorityEnabled = true,
     statWeights        = nil,       -- table of ITEM_MOD_X = weight (legacy, migrated)
     statWeightsName    = nil,       -- display name from Pawn string (legacy, migrated)
     statWeightSource   = "pawn",    -- "pawn" | "import"
@@ -46,6 +47,13 @@ local CHAR_DEFAULTS = {
     transmogNeedEnabled  = false,   -- auto-need appearances not yet collected
     tierTokenNeedEnabled = true,    -- auto-need tier tokens for your class
     lockboxRollMode    = "pass",   -- "off" / "pass" / "greed" / "need"
+    lootReserveEnabled = false,
+    lootReserveMainSpecAction = "need",  -- "manual" / "need" / "greed" / "pass"
+    lootReserveOffspecAction  = "greed", -- "manual" / "need" / "greed" / "pass"
+    bossLootOverlayEnabled = false,
+    bossLootOverlayDifficulty = "Auto",
+    bossLootOverlayOpacity = 35,
+    bossLootOverlayPos = nil,
     collectedItems     = {},
 }
 
@@ -241,6 +249,26 @@ local function HandleSlash(msg)
     elseif cmd == "debuglog" then
         SLH.DebugLog:Toggle()
 
+    elseif cmd == "bossloot" then
+        if SLH.BossLootOverlay then
+            if arg1 == "clear" then
+                SLH.BossLootOverlay:ClearTestBoss()
+            elseif arg1 and arg1:match("^test%s+") then
+                local boss = arg1:gsub("^test%s+", "")
+                local diff = nil
+                local lastWord = boss:match("(%S+)$")
+                local diffMap = { normal = "Normal", heroic = "Heroic", hc = "Heroic", celestial = "Celestial", combined = "Combined", auto = "Auto" }
+                if lastWord and diffMap[lastWord] then
+                    diff = diffMap[lastWord]
+                    boss = boss:gsub("%s*" .. lastWord .. "%s*$", "")
+                    if diff == "Auto" then diff = nil end
+                end
+                SLH.BossLootOverlay:SetTestBoss(boss, diff)
+            else
+                SLH.BossLootOverlay:Toggle()
+            end
+        end
+
     elseif cmd == "reset" then
         SLH.History:Reset()
         print("|cff00ccff[SLH]|r Greed history cleared.")
@@ -287,6 +315,9 @@ local function HandleSlash(msg)
         print("  /slh ilvl <N>   - Set iLvl threshold for this character")
         print("  /slh ilvl off   - Disable iLvl auto-greed")
         print("  /slh bis        - Open BiS preview window")
+        print("  /slh bossloot   - Show/hide boss loot overlay")
+        print("  /slh bossloot test <boss> [normal|heroic|celestial|combined] - Preview boss loot overlay")
+        print("  /slh bossloot clear - Clear boss loot preview")
         print("  /slh debuglog   - Open/close the debug log viewer")
         print("  /slh history    - Show greed history summary")
         print("  /slh reset      - Clear greed history")
@@ -319,6 +350,7 @@ bootFrame:SetScript("OnEvent", function()
     SLH.History:MigrateFromAccount()
     SLH.Options:BuildPanel()
     SLH.BisPreview:Init()
+    SLH.BossLootOverlay:Init()
     SLH.MinimapIcon:Init()
-    print("|cff00ccff[SLH]|r v1.3.2 loaded. Use /slh for help.")
+    print("|cff00ccff[SLH]|r v1.5.0 loaded. Use /slh for help.")
 end)

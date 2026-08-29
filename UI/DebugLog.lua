@@ -100,7 +100,7 @@ local function BuildHistoryLines()
             local color = "|cff66ff66"
             if e.action == "NEED" then color = "|cffff6666"
             elseif e.action == "PASS" then color = "|cff999999" end
-            lines[#lines + 1] = e.time .. "  " .. color .. e.action .. "|r  " .. (e.item or "?") .. "  " .. (e.reason or "")
+            lines[#lines + 1] = e.time .. "  " .. color .. e.action .. "|r  " .. (e.link or e.item or "?") .. "  " .. (e.reason or "")
         end
     end
     return lines
@@ -264,6 +264,14 @@ function DebugLog:Show()
         editBox:SetFontObject("GameFontHighlightSmall")
         editBox:SetWidth(scrollFrame:GetWidth() - 10)
         editBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+        editBox:SetHyperlinksEnabled(true)
+        editBox:SetScript("OnHyperlinkEnter", function(self, link)
+            GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+            GameTooltip:SetHyperlink(link)
+        end)
+        editBox:SetScript("OnHyperlinkLeave", function()
+            GameTooltip:Hide()
+        end)
         scrollFrame:SetScrollChild(editBox)
         frame.editBox = editBox
 

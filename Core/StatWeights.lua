@@ -201,6 +201,27 @@ end
 -- Returns a list of scale name strings, or empty table if Pawn absent.
 ------------------------------------------------------------------------
 function StatWeights:GetPawnScales()
+    -- Prefer PawnGetAllScalesEx: returns IsVisible per character (most accurate)
+    if PawnGetAllScalesEx then
+        local scalesEx = PawnGetAllScalesEx()
+        if scalesEx then
+            local visible = {}
+            local all = {}
+            for _, entry in ipairs(scalesEx) do
+                local name = entry.LocalizedName or entry.Name
+                if name then
+                    all[#all + 1] = name
+                    if entry.IsVisible then
+                        visible[#visible + 1] = name
+                    end
+                end
+            end
+            -- Show visible scales first; fall back to all if none visible
+            if #visible > 0 then return visible end
+            if #all > 0 then return all end
+        end
+    end
+
     if not PawnGetAllScales then return {} end
     local scales = PawnGetAllScales()
     if not scales then return {} end

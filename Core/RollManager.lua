@@ -20,6 +20,20 @@ local ROLL_LABEL = {
 }
 
 ------------------------------------------------------------------------
+-- The MoP client can ignore a roll sent in the same START_LOOT_ROLL
+-- event that creates the roll frame. Delay the call until that frame
+-- has finished initialising, then confirm the roll still exists.
+------------------------------------------------------------------------
+local NativeRollOnLoot = RollOnLoot
+local function RollOnLoot(rollID, rollType)
+    C_Timer.After(0.05, function()
+        if GetLootRollItemLink(rollID) then
+            NativeRollOnLoot(rollID, rollType)
+        end
+    end)
+end
+
+------------------------------------------------------------------------
 -- Session memory — tracks manual rolls this session (cleared on logout)
 -- Key: itemID, Value: rollType (0/1/2/3)
 ------------------------------------------------------------------------
@@ -91,6 +105,32 @@ local function Debug(msg)
     if SLH.DebugLog then
         SLH.DebugLog:Add(msg)
     end
+end
+
+------------------------------------------------------------------------
+-- Check configured BiS lists with offspec either included or excluded.
+-- Used by LootReserve to choose its Main Spec or Off Spec action.
+------------------------------------------------------------------------
+local function IsConfiguredBiS(itemID, includeOffspec)
+    local charDB = aSmoothLootHelperCharDB
+    if not charDB then return false end
+
+    local previous = charDB.bisOffspecEnabled
+    charDB.bisOffspecEnabled = includeOffspec
+
+    local matched = false
+    local providerEnabled = charDB.bisProviderEnabled
+    for providerName, provider in pairs(bisProviders) do
+        if not providerEnabled or providerEnabled[providerName] ~= false then
+            if provider:IsBiS(itemID) or provider:IsNormalVersionOfBiS(itemID) then
+                matched = true
+                break
+            end
+        end
+    end
+
+    charDB.bisOffspecEnabled = previous
+    return matched
 end
 
 ------------------------------------------------------------------------
@@ -332,6 +372,42 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     end
 
     --------------------------------------------------------------------
+    -- LootReserve: only act on wearable items personally reserved by
+    -- this player. Manual blocks lower-priority auto-roll rules.
+    --------------------------------------------------------------------
+    if GetSetting("lootReserveEnabled")
+       and SLH.LootReserve
+       and ItemUtil:GetEquipSlots(itemLink)
+       and SLH.LootReserve:IsPlayerReserve(itemID) then
+        local isMainSpec = IsConfiguredBiS(itemID, false)
+        local isOffspec = not isMainSpec
+                       and aSmoothLootHelperCharDB.bisOffspecEnabled
+                       and IsConfiguredBiS(itemID, true)
+        if not isMainSpec and not isOffspec then
+            Debug("  LootReserve: personally reserved wearable item is not on a configured BiS list — manual")
+            return
+        end
+
+        local action = isOffspec
+                       and (GetSetting("lootReserveOffspecAction") or "greed")
+                       or (GetSetting("lootReserveMainSpecAction") or "need")
+        local specLabel = isOffspec and "offspec" or "mainspec"
+        Debug("  LootReserve: personally reserved " .. specLabel .. " item, action=" .. action)
+        if action == "manual" then
+            return
+        end
+
+        local rollType = ROLL_PASS
+        if action == "need" then rollType = ROLL_NEED
+        elseif action == "greed" then rollType = ROLL_GREED
+        end
+        RollOnLoot(rollID, rollType)
+        if rollType == ROLL_GREED then History:RecordGreed(itemID) end
+        self:Announce(itemLink, ROLL_LABEL[rollType] .. " (LootReserve)")
+        return
+    end
+
+    --------------------------------------------------------------------
     -- Quality-based auto-roll: auto-roll on items at or below a
     -- quality threshold (2 = Uncommon/green, 3 = Rare/blue).
     --------------------------------------------------------------------
@@ -523,6 +599,15 @@ function RollManager:EvaluateRoll(rollID, retryCount)
     --------------------------------------------------------------------
     -- Auto-greed downgrades: uses Pawn → built-in stat weights → ilvl.
     --------------------------------------------------------------------
+    -- Heirloom priority runs before the normal Pawn/stat-weight comparison.
+    if GetSetting("heirloomPriorityEnabled") and ItemUtil:HasValidEquippedHeirloom(itemLink) then
+        Debug("  Heirloom priority: valid equipped heirloom in matching slot — GREED")
+        RollOnLoot(rollID, ROLL_GREED)
+        History:RecordGreed(itemID)
+        self:Announce(itemLink, "GREED (valid equipped heirloom)")
+        return
+    end
+
     if GetSetting("downgradeGreedEnabled") then
         -- 1) Try Pawn addon first (full stat weight analysis)
         local pawnUpgrade = ItemUtil:PawnIsUpgrade(itemLink)

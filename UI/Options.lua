@@ -234,6 +234,9 @@ local function CreateDropdown(y, label, dbTable, dbKey, choices, default)
                 dbTable[dbKey] = btn.value
                 UIDropDownMenu_SetSelectedValue(dropdown, btn.value)
                 UIDropDownMenu_SetText(dropdown, GetLabel(btn.value))
+                if SLH.BossLootOverlay and dbKey == "bossLootOverlayDifficulty" then
+                    SLH.BossLootOverlay:Refresh()
+                end
             end
             UIDropDownMenu_AddButton(info, level)
         end
@@ -667,20 +670,46 @@ function Options:BuildPanel()
             end
 
             for _, frogKey in ipairs(frogSpecsToList) do
-                -- Add the base spec template
+                -- Add the base spec template (with tier info if available)
                 if not seen[frogKey] then
                     seen[frogKey] = true
-                    choices[#choices + 1] = { value = frogKey, label = frogKey .. "  (FrogBiS)" }
+                    local tpl = FrogBiS_Templates[frogKey]
+                    local tierStr = (tpl and tpl.tier and tpl.tier ~= "") and (" · " .. tpl.tier) or ""
+                    choices[#choices + 1] = { value = frogKey, label = frogKey .. tierStr .. "  (FrogBiS)" }
                 end
 
                 -- Add all custom named sets for this spec from FrogBiSDB
                 if FrogBiSDB and FrogBiSDB.sets and FrogBiSDB.sets[frogKey] then
                     for i, s in ipairs(FrogBiSDB.sets[frogKey]) do
-                        if s.name and s.items and #s.items > 0 then
+                        if s.name then
                             local setKey = frogKey .. "::" .. s.name
                             if not seen[setKey] then
                                 seen[setKey] = true
                                 choices[#choices + 1] = { value = setKey, label = "  " .. s.name .. "  (FrogBiS set)" }
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Also scan FrogBiSDB.sets for any class spec keys we haven't covered
+            -- (catches sets for specs not in current allowedSpecs filter)
+            if FrogBiSDB and FrogBiSDB.sets and frogClass then
+                for setSpecKey, sets in pairs(FrogBiSDB.sets) do
+                    if setSpecKey:find(frogClass, 1, true) and not seen[setSpecKey] then
+                        -- Add the base spec as a choice
+                        seen[setSpecKey] = true
+                        choices[#choices + 1] = { value = setSpecKey, label = setSpecKey .. "  (FrogBiS)" }
+                        -- Add its named sets
+                        for i, s in ipairs(sets) do
+                            if s.name then
+                                local setKey = setSpecKey .. "::" .. s.name
+                                if not seen[setKey] then
+                                    seen[setKey] = true
+                                    local hasItems = s.items and #s.items > 0
+                                    local suffix = hasItems and "  (FrogBiS set)" or "  (FrogBiS set, empty)"
+                                    choices[#choices + 1] = { value = setKey, label = "  " .. s.name .. suffix }
+                                end
                             end
                         end
                     end
@@ -804,6 +833,63 @@ function Options:BuildPanel()
     CreateHelpText(y, "Auto-needs any item whose appearance you\nhaven't learned yet. Runs before the armor\nfilter so off-type appearances are included.")
     y = y - 44
 
+    ---------- LOOTRESERVE ----------
+    CreateSeparator(y, "LOOTRESERVE")
+    y = y - 24
+
+    CreateCheckbox(y, "Use LootReserve personal reserves", charDB, "lootReserveEnabled", false)
+    y = y - 26
+
+    CreateDropdown(y, "Main Spec reserved item action:", charDB, "lootReserveMainSpecAction", {
+        { value = "manual", label = "Manual roll" },
+        { value = "need",   label = "Need (roll 100)" },
+        { value = "greed",  label = "Greed" },
+        { value = "pass",   label = "Pass" },
+    }, "need")
+    y = y - 46
+    CreateDropdown(y, "Off Spec reserved item action:", charDB, "lootReserveOffspecAction", {
+        { value = "manual", label = "Manual roll" },
+        { value = "need",   label = "Need" },
+        { value = "greed",  label = "Greed (roll 99)" },
+        { value = "pass",   label = "Pass" },
+    }, "greed")
+    y = y - 46
+    CreateHelpText(y, "Only applies to wearable items you personally\nreserved in the active LootReserve raid session.\nOff Spec requires a matching configured off-spec BiS list.")
+    y = y - 44
+
+    ---------- BOSS LOOT OVERLAY ----------
+    CreateSeparator(y, "BOSS LOOT OVERLAY")
+    y = y - 24
+
+    local bossLootCb = CreateCheckbox(y, "Show draggable boss loot text", charDB, "bossLootOverlayEnabled", false)
+    bossLootCb:SetScript("OnClick", function(self)
+        charDB.bossLootOverlayEnabled = self:GetChecked() and true or false
+        if SLH.BossLootOverlay then
+            SLH.BossLootOverlay:SetVisible(charDB.bossLootOverlayEnabled)
+        end
+    end)
+    y = y - 26
+
+    CreateDropdown(y, "Boss loot difficulty:", charDB, "bossLootOverlayDifficulty", {
+        { value = "Auto",     label = "Auto-detect" },
+        { value = "Normal",   label = "Normal" },
+        { value = "Heroic",   label = "Heroic" },
+        { value = "Celestial", label = "Celestial" },
+        { value = "Combined", label = "Combined" },
+    }, "Auto")
+    y = y - 46
+
+    local opacitySlider = CreateSlider(y, "Boss loot background opacity:", charDB, "bossLootOverlayOpacity", 0, 100, 5)
+    opacitySlider:HookScript("OnValueChanged", function()
+        if SLH.BossLootOverlay then
+            SLH.BossLootOverlay:ApplyOpacity()
+        end
+    end)
+    y = y - 58
+
+    CreateHelpText(y, "Shows LootReserve favorites and configured BiS drops for your current target or encounter.\nDuplicates are merged. Drag the text itself to move it. Use /slh bossloot to toggle.")
+    y = y - 44
+
     -- Set main panel content height
     content:SetHeight(math.abs(y) + 30)
 
@@ -910,6 +996,10 @@ function Options:BuildPanel()
     -- Downgrade greed
     AdvCreateCheckbox("Auto-greed downgrades (Pawn / stat weights / ilvl)", charDB, "downgradeGreedEnabled", true)
     AdvCreateHelpText("Uses Pawn or stat weights to compare drops\nvs. equipped gear. Worse items are greeded.")
+    ay = ay - 40
+
+    AdvCreateCheckbox("Prioritize valid equipped heirlooms", charDB, "heirloomPriorityEnabled", true)
+    AdvCreateHelpText("Auto-greeds matching-slot drops while your\nequipped heirloom is within its level range.")
     ay = ay - 40
 
     -- Stat Weights (multi-spec)

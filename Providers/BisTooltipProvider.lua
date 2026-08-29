@@ -293,22 +293,6 @@ function provider:IsBiS(itemID)
             Debug("    [BisTooltip] item " .. itemID .. " not found directly, matched variant " .. matchedVariant)
         end
     end
-    -- Name-based fallback: if ID offsets didn't find it, search by name
-    if not entries then
-        local dropName = GetItemInfo(itemID)
-        if dropName then
-            local lowerName = dropName:lower()
-            for bisID, bisEntries in pairs(Bistooltip_items) do
-                local bisName = GetItemInfo(bisID)
-                if bisName and bisName:lower() == lowerName then
-                    entries = bisEntries
-                    matchedVariant = bisID
-                    Debug("    [BisTooltip] item " .. itemID .. " matched by name '" .. dropName .. "' → " .. bisID)
-                    break
-                end
-            end
-        end
-    end
     if not entries then
         Debug("    [BisTooltip] item " .. itemID .. " not in BiS database")
         return false
